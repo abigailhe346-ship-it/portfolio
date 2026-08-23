@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Cpath d=%27M4 22 C 10 14, 20 8, 28 7 C 24 12, 14 20, 5 24 Z%27 fill=%27%23c8442a%27/%3E%3C/svg%3E">
 <title>Plein Air — A Digital Impressionist Studio</title>
 <meta name="description" content="Plein Air — a digital impressionist studio. Eighteen works of generative art, web experiences, agent systems and 3D. Every pixel painted by code at runtime.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,6 +13,8 @@
   --paper:#f2ede0; --ink:#2a2e28; --soft:#66695d;
   --verm:#c8442a; --gold:#d9a441;
   --line:rgba(42,46,40,.16);
+  --ease-diffuse:cubic-bezier(.22,.9,.24,1);
+  --ease-ink:cubic-bezier(.45,.05,.15,1);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -21,7 +23,9 @@ body{background:var(--paper);color:var(--ink);font-family:'Space Grotesk',sans-s
 a{color:inherit;text-decoration:none}
 button{font:inherit;background:none;border:none;cursor:pointer;color:inherit}
 
-/* ---------- grain ---------- */
+/* ---------- ambient light & grain ---------- */
+.ambient{position:fixed;inset:0;z-index:0;pointer-events:none}
+.hero,.section,.about,.footer{position:relative;z-index:1}
 .grain{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.05;mix-blend-mode:multiply;background-repeat:repeat;background-size:140px 140px}
 
 /* ---------- nav ---------- */
@@ -180,31 +184,116 @@ button{font:inherit;background:none;border:none;cursor:pointer;color:inherit}
     <span class="sec-count">05 Studies</span>
   </div>
   <ul class="plist">
-    <li><a class="prow" href="projects/flow-field/">
+    <li class="pitem" style="--acc:#d9a441;--accA:rgba(217,164,65,.10)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-01" data-demo="projects/flow-field/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="wheat"></canvas></span>
       <span class="pnum">No.01</span><span class="ptitle">Wind over Wheat<span class="cn">麦田</span></span>
       <span class="pdesc">A wheat field painted stroke by stroke — thousands of bristle particles follow the current of the wind, and your hand bends the grain.</span>
-      <span class="ptags">Canvas 2D · Flow Field</span><span class="parrow">→</span></a></li>
-    <li><a class="prow" href="projects/type-particles/">
+      <span class="ptags">Canvas 2D · Flow Field</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-01"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">一片会听话的麦田——风往哪吹，笔往哪倒。</p>
+          <p class="pcraft">3,200 枚锥形笔触粒子沿 curl noise 流场倒伏，大笔触打底、逐层细化。你的手就是另一阵风：划到哪里，哪里的金色就先弯下腰。</p>
+          <div class="pcheat"><span class="ptag">笔触粒子</span><span class="ptag">Curl Noise</span><span class="ptag">Canvas 2D</span><span class="phint"><svg viewBox="0 0 14 14"><path d="M7 1.5v11M1.5 7h11M7 1.5L4.8 3.7M7 1.5l2.2 2.2M7 12.5l-2.2-2.2M7 12.5l2.2-2.2M1.5 7l2.2-2.2M1.5 7l2.2 2.2M12.5 7l-2.2-2.2M12.5 7l-2.2 2.2"/></svg><i>指针拨流</i></span><span class="phint"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="2"/><circle cx="7" cy="7" r="5.2" opacity=".5"/></svg><i>点击重染三色</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.01 Wind over Wheat — playable study" data-src="projects/flow-field/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/flow-field/">Open full screen ↗</a>
+            <span class="pstat">No.01 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
+    <li class="pitem" style="--acc:#a8c5a0;--accA:rgba(168,197,160,.12)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-02" data-demo="projects/type-particles/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="dandelion"></canvas></span>
       <span class="pnum">No.02</span><span class="ptitle">Dandelion<span class="cn">蒲公英</span></span>
       <span class="pdesc">Eight thousand seeds hold the shape of a word, then scatter at a breath. Type anything and they gather again.</span>
-      <span class="ptags">Canvas 2D · Springs</span><span class="parrow">→</span></a></li>
-    <li><a class="prow" href="projects/shader-gradients/">
+      <span class="ptags">Canvas 2D · Springs</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-02"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">一个字就是一朵蒲公英，呼气即散。</p>
+          <p class="pcraft">8,000 个弹簧物理粒子在字形轮廓上聚拢成字，指针掠过即四散飘飞。输入任何文字，它们会重新找到彼此。</p>
+          <div class="pcheat"><span class="ptag">弹簧物理</span><span class="ptag">字形采样</span><span class="ptag">Canvas 2D</span><span class="phint"><svg viewBox="0 0 14 14"><path d="M7 1.5v11M1.5 7h11M7 1.5L4.8 3.7M7 1.5l2.2 2.2M7 12.5l-2.2-2.2M7 12.5l2.2-2.2M1.5 7l2.2-2.2M1.5 7l2.2 2.2M12.5 7l-2.2-2.2M12.5 7l-2.2 2.2"/></svg><i>指针吹散</i></span><span class="phint"><svg viewBox="0 0 14 14"><rect x="1.2" y="5" width="3.2" height="3.6" rx=".8"/><rect x="5.4" y="5" width="3.2" height="3.6" rx=".8"/><rect x="9.6" y="5" width="3.2" height="3.6" rx=".8"/></svg><i>输入重组</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.02 Dandelion — playable study" data-src="projects/type-particles/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/type-particles/">Open full screen ↗</a>
+            <span class="pstat">No.02 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
+    <li class="pitem" style="--acc:#4a5a8a;--accA:rgba(74,90,138,.10)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-03" data-demo="projects/shader-gradients/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="sky"></canvas></span>
       <span class="pnum">No.03</span><span class="ptitle">Sky Studies<span class="cn">天色</span></span>
       <span class="pdesc">Studies of a single sky — domain-warped clouds looping through five weathers, each one frameable as wallpaper.</span>
-      <span class="ptags">WebGL · GLSL</span><span class="parrow">→</span></a></li>
-    <li><a class="prow" href="projects/perlin-landscape/">
+      <span class="ptags">WebGL · GLSL</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-03"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">同一片天空的十二种脾气。</p>
+          <p class="pcraft">Domain-warped fbm 噪声在 GLSL 里揉出丝缎般的云，五种莫奈天色无缝循环十二秒。任意一帧都可导出为壁纸。</p>
+          <div class="pcheat"><span class="ptag">Domain Warp</span><span class="ptag">fbm</span><span class="ptag">GLSL</span><span class="phint"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="2"/><circle cx="7" cy="7" r="5.2" opacity=".5"/></svg><i>切换天色</i></span><span class="phint"><svg viewBox="0 0 14 14"><rect x="1.2" y="5" width="3.2" height="3.6" rx=".8"/><rect x="5.4" y="5" width="3.2" height="3.6" rx=".8"/><rect x="9.6" y="5" width="3.2" height="3.6" rx=".8"/></svg><i>快捷键导出</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.03 Sky Studies — playable study" data-src="projects/shader-gradients/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/shader-gradients/">Open full screen ↗</a>
+            <span class="pstat">No.03 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
+    <li class="pitem" style="--acc:#9fb2a8;--accA:rgba(159,178,168,.14)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-04" data-demo="projects/perlin-landscape/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="mist"></canvas></span>
       <span class="pnum">No.04</span><span class="ptitle">Mist Mountains<span class="cn">远山</span></span>
       <span class="pdesc">Ridgelines dissolving into fog, cut in woodcut layers that drift with the hour — paper-and-ink dusk or fluorescent dawn.</span>
-      <span class="ptags">Canvas 2D · fBm</span><span class="parrow">→</span></a></li>
-    <li><a class="prow" href="projects/motion-poster/">
+      <span class="ptags">Canvas 2D · fBm</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-04"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">远山总在将散未散之间。</p>
+          <p class="pcraft">fBm 山脊以木刻版画的层层叠印推进，大气透视让远端只剩一层雾。一键从纸墨黄昏切到荧光黎明。</p>
+          <div class="pcheat"><span class="ptag">fBm 山脊</span><span class="ptag">木刻叠印</span><span class="ptag">大气透视</span><span class="phint"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="2"/><circle cx="7" cy="7" r="5.2" opacity=".5"/></svg><i>切换晨昏</i></span><span class="phint"><svg viewBox="0 0 14 14"><path d="M7 1.5v11M1.5 7h11M7 1.5L4.8 3.7M7 1.5l2.2 2.2M7 12.5l-2.2-2.2M7 12.5l2.2-2.2M1.5 7l2.2-2.2M1.5 7l2.2 2.2M12.5 7l-2.2-2.2M12.5 7l-2.2 2.2"/></svg><i>视差漂移</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.04 Mist Mountains — playable study" data-src="projects/perlin-landscape/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/perlin-landscape/">Open full screen ↗</a>
+            <span class="pstat">No.04 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
+    <li class="pitem" style="--acc:#8d7fb8;--accA:rgba(141,127,184,.10)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-05" data-demo="projects/motion-poster/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="starry"></canvas></span>
       <span class="pnum">No.05</span><span class="ptitle">Starry Poster<span class="cn">星月夜</span></span>
       <span class="pdesc">A starry night that never sits still — kinetic type orbiting a painted moon, three spring-animated acts in loop.</span>
-      <span class="ptags">Canvas 2D · Kinetic Type</span><span class="parrow">→</span></a></li>
+      <span class="ptags">Canvas 2D · Kinetic Type</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-05"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">一张不肯安静的星月夜海报。</p>
+          <p class="pcraft">动能文字沿三套弹簧版式循环起舞，看上去像 AI 生成的视频，实则每一帧都实时画在 2D 画布上。</p>
+          <div class="pcheat"><span class="ptag">动能文字</span><span class="ptag">弹簧版式</span><span class="ptag">Canvas 2D</span><span class="phint"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="2"/><circle cx="7" cy="7" r="5.2" opacity=".5"/></svg><i>切换三版式</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.05 Starry Poster — playable study" data-src="projects/motion-poster/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/motion-poster/">Open full screen ↗</a>
+            <span class="pstat">No.05 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
   </ul>
 </section>
 
@@ -216,26 +305,94 @@ button{font:inherit;background:none;border:none;cursor:pointer;color:inherit}
     <span class="sec-count">04 Studies</span>
   </div>
   <ul class="plist">
-    <li><a class="prow" href="projects/mono-editorial/">
+    <li class="pitem" style="--acc:#4a3b2a;--accA:rgba(74,59,42,.08)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-06" data-demo="projects/mono-editorial/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="catalog"></canvas></span>
       <span class="pnum">No.06</span><span class="ptitle">Exhibition Catalog<span class="cn">画册</span></span>
       <span class="pdesc">The exhibition catalog, bound in a browser — giant serif pages with a sticky horizontal gallery slipped between them.</span>
-      <span class="ptags">Editorial · Scroll</span><span class="parrow">→</span></a></li>
-    <li><a class="prow" href="projects/product-orb/">
+      <span class="ptags">Editorial · Scroll</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-06"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">把整本画册装订进浏览器。</p>
+          <p class="pcraft">12vw 衬线巨字做封面，粘性横向画廊做内页，Lenis 滚动如翻纸。文字逐词浮现，像有人在灯下朗读。</p>
+          <div class="pcheat"><span class="ptag">编辑排版</span><span class="ptag">粘性滚动</span><span class="ptag">Lenis</span><span class="phint"><svg viewBox="0 0 14 14"><path d="M7 1.5v11M4.6 3.6L7 1.5l2.4 2.1M4.6 10.4L7 12.5l2.4-2.1"/></svg><i>滚动翻页</i></span><span class="phint"><svg viewBox="0 0 14 14"><path d="M7 1.5v11M1.5 7h11M7 1.5L4.8 3.7M7 1.5l2.2 2.2M7 12.5l-2.2-2.2M7 12.5l2.2-2.2M1.5 7l2.2-2.2M1.5 7l2.2 2.2M12.5 7l-2.2-2.2M12.5 7l-2.2 2.2"/></svg><i>横向画廊</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.06 Exhibition Catalog — playable study" data-src="projects/mono-editorial/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/mono-editorial/">Open full screen ↗</a>
+            <span class="pstat">No.06 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
+    <li class="pitem" style="--acc:#e8c05a;--accA:rgba(232,192,90,.14)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-07" data-demo="projects/product-orb/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="firefly"></canvas></span>
       <span class="pnum">No.07</span><span class="ptitle">Firefly Product<span class="cn">萤火</span></span>
       <span class="pdesc">A swarm of fireflies learns the shape of a product — breathing orb, then grid, then silhouette, across three scroll-driven acts.</span>
-      <span class="ptags">Canvas 2D · Scroll-driven</span><span class="parrow">→</span></a></li>
-    <li><a class="prow" href="projects/type-lab/">
+      <span class="ptags">Canvas 2D · Scroll-driven</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-07"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">让一群萤火虫学会产品的形状。</p>
+          <p class="pcraft">900 粒萤火随滚动呼吸成球、散作星阵、再聚成产品剪影。三幕 scroll-driven 变形，全程没有一帧预渲染。</p>
+          <div class="pcheat"><span class="ptag">粒子变形</span><span class="ptag">Scroll-driven</span><span class="ptag">Canvas 2D</span><span class="phint"><svg viewBox="0 0 14 14"><path d="M7 1.5v11M4.6 3.6L7 1.5l2.4 2.1M4.6 10.4L7 12.5l2.4-2.1"/></svg><i>滚动驱动三幕</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.07 Firefly Product — playable study" data-src="projects/product-orb/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/product-orb/">Open full screen ↗</a>
+            <span class="pstat">No.07 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
+    <li class="pitem" style="--acc:#2a2e28;--accA:rgba(42,46,40,.07)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-08" data-demo="projects/type-lab/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="brushtype"></canvas></span>
       <span class="pnum">No.08</span><span class="ptitle">Brush Type<span class="cn">笔触字坊</span></span>
       <span class="pdesc">Letters cut like brushstrokes — weight, tracking, slant and wind on giant editable type, with wave, orbit and scatter modes.</span>
-      <span class="ptags">Typography · Physics</span><span class="parrow">→</span></a></li>
-    <li><a class="prow" href="projects/moodboard/">
+      <span class="ptags">Typography · Physics</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-08"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">把字体当笔锋来练。</p>
+          <p class="pcraft">字重、字距、倾角、字号全部可调，wave / orbit / scatter 三种物理模式让巨字像墨迹一样有脾气。</p>
+          <div class="pcheat"><span class="ptag">可变字体</span><span class="ptag">物理模式</span><span class="ptag">Typography</span><span class="phint"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M2.5 7l2.4-2.4M2.5 7l2.4 2.4M11.5 7L9.1 4.6M11.5 7l-2.4 2.4"/></svg><i>滑杆调参</i></span><span class="phint"><svg viewBox="0 0 14 14"><rect x="1.2" y="5" width="3.2" height="3.6" rx=".8"/><rect x="5.4" y="5" width="3.2" height="3.6" rx=".8"/><rect x="9.6" y="5" width="3.2" height="3.6" rx=".8"/></svg><i>直接输入</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.08 Brush Type — playable study" data-src="projects/type-lab/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/type-lab/">Open full screen ↗</a>
+            <span class="pstat">No.08 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
+    <li class="pitem" style="--acc:#e07b39;--accA:rgba(224,123,57,.10)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-09" data-demo="projects/moodboard/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="studiowall"></canvas></span>
       <span class="pnum">No.09</span><span class="ptitle">Studio Wall<span class="cn">画室墙</span></span>
       <span class="pdesc">The studio wall — pin studies, tear them down, fling them across the cork and let inertia settle the rest.</span>
-      <span class="ptags">Pointer · Inertia</span><span class="parrow">→</span></a></li>
+      <span class="ptags">Pointer · Inertia</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-09"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">画室的那面墙，钉满没画完的东西。</p>
+          <p class="pcraft">软木板上的卡片可拖、可甩，带惯性与摩擦，倾斜随手势变化。灵感不够时，一键再生成一张渐变卡。</p>
+          <div class="pcheat"><span class="ptag">惯性拖拽</span><span class="ptag">生成卡片</span><span class="ptag">Pointer</span><span class="phint"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M2.5 7l2.4-2.4M2.5 7l2.4 2.4M11.5 7L9.1 4.6M11.5 7l-2.4 2.4"/></svg><i>拖拽甩动</i></span><span class="phint"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="2"/><circle cx="7" cy="7" r="5.2" opacity=".5"/></svg><i>生成新卡</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.09 Studio Wall — playable study" data-src="projects/moodboard/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/moodboard/">Open full screen ↗</a>
+            <span class="pstat">No.09 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
   </ul>
 </section>
 
@@ -247,26 +404,94 @@ button{font:inherit;background:none;border:none;cursor:pointer;color:inherit}
     <span class="sec-count">04 Studies</span>
   </div>
   <ul class="plist">
-    <li><a class="prow" href="projects/agent-trace/">
+    <li class="pitem" style="--acc:#2e4a3f;--accA:rgba(46,74,63,.09)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-10" data-demo="projects/agent-trace/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="fieldnotes"></canvas></span>
       <span class="pnum">No.10</span><span class="ptitle">Field Notes<span class="cn">观察笔记</span></span>
       <span class="pdesc">Field notes from an agent's mind — thoughts streamed live, tool calls unfolded, memory pinned to the page.</span>
-      <span class="ptags">UI Systems · Streaming</span><span class="parrow">→</span></a></li>
-    <li><a class="prow" href="projects/workflow-builder/">
+      <span class="ptags">UI Systems · Streaming</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-10"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">一个 agent 的观察笔记。</p>
+          <p class="pcraft">推理过程如溪流逐字流出，工具调用是可展开的 JSON 标本，记忆面板实时更新，最后装订成一张简报卡。</p>
+          <div class="pcheat"><span class="ptag">流式 UI</span><span class="ptag">JSON 展开</span><span class="ptag">状态面板</span><span class="phint"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="2"/><circle cx="7" cy="7" r="5.2" opacity=".5"/></svg><i>展开工具调用</i></span><span class="phint"><svg viewBox="0 0 14 14"><path d="M7 1.5v11M4.6 3.6L7 1.5l2.4 2.1M4.6 10.4L7 12.5l2.4-2.1"/></svg><i>流式阅读</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.10 Field Notes — playable study" data-src="projects/agent-trace/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/agent-trace/">Open full screen ↗</a>
+            <span class="pstat">No.10 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
+    <li class="pitem" style="--acc:#7ba8a0;--accA:rgba(123,168,160,.12)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-11" data-demo="projects/workflow-builder/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="watershed"></canvas></span>
       <span class="pnum">No.11</span><span class="ptitle">Watershed<span class="cn">水系图</span></span>
       <span class="pdesc">A watershed of nodes — wire the tributaries on an infinite canvas, run it, and watch light find the river mouth.</span>
-      <span class="ptags">Canvas · Graph Engine</span><span class="parrow">→</span></a></li>
-    <li><a class="prow" href="projects/multi-agent-chat/">
+      <span class="ptags">Canvas · Graph Engine</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-11"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">把节点连成水系，看光找到入海口。</p>
+          <p class="pcraft">无限画布上拖出 LLM / 工具 / 条件节点，贝塞尔曲线如水系连接。运行时，能量沿河道发光流动。</p>
+          <div class="pcheat"><span class="ptag">节点图引擎</span><span class="ptag">贝塞尔连线</span><span class="ptag">Canvas</span><span class="phint"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M2.5 7l2.4-2.4M2.5 7l2.4 2.4M11.5 7L9.1 4.6M11.5 7l-2.4 2.4"/></svg><i>拖节点连线</i></span><span class="phint"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="2"/><circle cx="7" cy="7" r="5.2" opacity=".5"/></svg><i>点击运行</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.11 Watershed — playable study" data-src="projects/workflow-builder/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/workflow-builder/">Open full screen ↗</a>
+            <span class="pstat">No.11 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
+    <li class="pitem" style="--acc:#b5552d;--accA:rgba(181,85,45,.10)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-12" data-demo="projects/multi-agent-chat/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="three"></canvas></span>
       <span class="pnum">No.12</span><span class="ptitle">Three Painters<span class="cn">三人写生</span></span>
       <span class="pdesc">Three painters, one canvas — planner, researcher and critic argue their way toward a shared picture, consensus on a gauge.</span>
-      <span class="ptags">Multi-Agent · Simulation</span><span class="parrow">→</span></a></li>
-    <li><a class="prow" href="projects/prompt-playground/">
+      <span class="ptags">Multi-Agent · Simulation</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-12"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">三个画家抢一块画布。</p>
+          <p class="pcraft">Planner、Researcher、Critic 各自动笔又互相说服，共识仪表实时摆动。争吵结束之处，就是成稿。</p>
+          <div class="pcheat"><span class="ptag">多智能体</span><span class="ptag">共识仪表</span><span class="ptag">Simulation</span><span class="phint"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="2"/><circle cx="7" cy="7" r="5.2" opacity=".5"/></svg><i>推进辩论</i></span><span class="phint"><svg viewBox="0 0 14 14"><path d="M7 1.5v11M4.6 3.6L7 1.5l2.4 2.1M4.6 10.4L7 12.5l2.4-2.1"/></svg><i>回顾过程</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.12 Three Painters — playable study" data-src="projects/multi-agent-chat/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/multi-agent-chat/">Open full screen ↗</a>
+            <span class="pstat">No.12 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
+    <li class="pitem" style="--acc:#9c7b4f;--accA:rgba(156,123,79,.12)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-13" data-demo="projects/prompt-playground/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="recipe"></canvas></span>
       <span class="pnum">No.13</span><span class="ptitle">Recipe Manuscript<span class="cn">配方手稿</span></span>
       <span class="pdesc">A recipe manuscript for prompts — measured steps, temperature to taste, and the differences between two tastings underlined.</span>
-      <span class="ptags">IDE UI · Diff Engine</span><span class="parrow">→</span></a></li>
+      <span class="ptags">IDE UI · Diff Engine</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-13"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">提示词的手写配方，剂量精确到温度。</p>
+          <p class="pcraft">模板化步骤带变量高亮，温度滑杆即调味，token 成本逐克称重。两次运行之间的用词差异被逐字划出。</p>
+          <div class="pcheat"><span class="ptag">模板链</span><span class="ptag">温度控制</span><span class="ptag">Diff 引擎</span><span class="phint"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M2.5 7l2.4-2.4M2.5 7l2.4 2.4M11.5 7L9.1 4.6M11.5 7l-2.4 2.4"/></svg><i>温度滑杆</i></span><span class="phint"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="2"/><circle cx="7" cy="7" r="5.2" opacity=".5"/></svg><i>运行对比</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.13 Recipe Manuscript — playable study" data-src="projects/prompt-playground/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/prompt-playground/">Open full screen ↗</a>
+            <span class="pstat">No.13 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
   </ul>
 </section>
 
@@ -278,31 +503,116 @@ button{font:inherit;background:none;border:none;cursor:pointer;color:inherit}
     <span class="sec-count">05 Studies</span>
   </div>
   <ul class="plist">
-    <li><a class="prow" href="projects/product-viewer/">
+    <li class="pitem" style="--acc:#5e9a90;--accA:rgba(94,154,144,.12)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-14" data-demo="projects/product-viewer/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="dew"></canvas></span>
       <span class="pnum">No.14</span><span class="ptitle">Morning Dew<span class="cn">晨露</span></span>
       <span class="pdesc">Morning dew held in glass — a procedural flacon under studio light, with swappable glass, metal and ceramic skins.</span>
-      <span class="ptags">Three.js · PBR</span><span class="parrow">→</span></a></li>
-    <li><a class="prow" href="projects/blob-sculpture/">
+      <span class="ptags">Three.js · PBR</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-14"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">把一滴晨露举到灯下。</p>
+          <p class="pcraft">程序化吹制的玻璃香水瓶，摄影棚三点布光加镜面地板。玻璃 / 金属 / 陶瓷三种 PBR 肤质一键替换。</p>
+          <div class="pcheat"><span class="ptag">程序化建模</span><span class="ptag">PBR 材质</span><span class="ptag">Three.js</span><span class="phint"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M2.5 7l2.4-2.4M2.5 7l2.4 2.4M11.5 7L9.1 4.6M11.5 7l-2.4 2.4"/></svg><i>旋转打光</i></span><span class="phint"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="2"/><circle cx="7" cy="7" r="5.2" opacity=".5"/></svg><i>换材质</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.14 Morning Dew — playable study" data-src="projects/product-viewer/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/product-viewer/">Open full screen ↗</a>
+            <span class="pstat">No.14 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
+    <li class="pitem" style="--acc:#3f7a6a;--accA:rgba(63,122,106,.10)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-15" data-demo="projects/blob-sculpture/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="water"></canvas></span>
       <span class="pnum">No.15</span><span class="ptitle">Water Study<span class="cn">水面</span></span>
       <span class="pdesc">A study of water standing still — 245k vertices of simplex current moving beneath an iridescent oil-slick skin.</span>
-      <span class="ptags">GLSL · Displacement</span><span class="parrow">→</span></a></li>
-    <li><a class="prow" href="projects/grid-city/">
+      <span class="ptags">GLSL · Displacement</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-15"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">一池站住不动的水。</p>
+          <p class="pcraft">245k 顶点在顶点着色器里被 simplex 噪声推移，表面覆一层油彩般的虹彩薄膜。拖拽即搅动整池水面。</p>
+          <div class="pcheat"><span class="ptag">顶点置换</span><span class="ptag">Simplex</span><span class="ptag">虹彩 GLSL</span><span class="phint"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M2.5 7l2.4-2.4M2.5 7l2.4 2.4M11.5 7L9.1 4.6M11.5 7l-2.4 2.4"/></svg><i>拖拽搅动</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.15 Water Study — playable study" data-src="projects/blob-sculpture/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/blob-sculpture/">Open full screen ↗</a>
+            <span class="pstat">No.15 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
+    <li class="pitem" style="--acc:#3a4670;--accA:rgba(58,70,112,.10)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-16" data-demo="projects/grid-city/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="rain"></canvas></span>
       <span class="pnum">No.16</span><span class="ptitle">Rainy Night<span class="cn">雨夜</span></span>
       <span class="pdesc">Rainy night in the grid city — 18,000 lit windows, headlights passing in the fog, and dawn only one click away.</span>
-      <span class="ptags">Instancing · Procedural</span><span class="parrow">→</span></a></li>
-    <li><a class="prow" href="projects/particle-galaxy/">
+      <span class="ptags">Instancing · Procedural</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-16"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">格子城的雨夜，霓虹都在雾里化开。</p>
+          <p class="pcraft">18,000 扇实例化窗格各自亮着，车灯穿过指数雾，远景低饱和压低。一键天亮，霓虹熄灯。</p>
+          <div class="pcheat"><span class="ptag">实例化城市</span><span class="ptag">指数雾</span><span class="ptag">Procedural</span><span class="phint"><svg viewBox="0 0 14 14"><path d="M7 1.5v11M4.6 3.6L7 1.5l2.4 2.1M4.6 10.4L7 12.5l2.4-2.1"/></svg><i>雾中穿行</i></span><span class="phint"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="2"/><circle cx="7" cy="7" r="5.2" opacity=".5"/></svg><i>一键破晓</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.16 Rainy Night — playable study" data-src="projects/grid-city/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/grid-city/">Open full screen ↗</a>
+            <span class="pstat">No.16 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
+    <li class="pitem" style="--acc:#caa53d;--accA:rgba(202,165,61,.12)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-17" data-demo="projects/particle-galaxy/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="valley"></canvas></span>
       <span class="pnum">No.17</span><span class="ptitle">Firefly Valley<span class="cn">萤火之谷</span></span>
       <span class="pdesc">A valley of a hundred thousand fireflies — scroll to fall through the swarm, cross the core, and look back.</span>
-      <span class="ptags">Shaders · Scroll-driven</span><span class="parrow">→</span></a></li>
-    <li><a class="prow" href="projects/kinetic-typo-3d/">
+      <span class="ptags">Shaders · Scroll-driven</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-17"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">十万只萤火聚成的山谷。</p>
+          <p class="pcraft">螺旋星系的粒子引擎改写了栖息地——滚动即俯冲穿谷，FOV 在越过核心时猛然拉伸。回头看，谷光未熄。</p>
+          <div class="pcheat"><span class="ptag">粒子引擎</span><span class="ptag">Scroll-driven</span><span class="ptag">Shaders</span><span class="phint"><svg viewBox="0 0 14 14"><path d="M7 1.5v11M4.6 3.6L7 1.5l2.4 2.1M4.6 10.4L7 12.5l2.4-2.1"/></svg><i>俯冲穿谷</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.17 Firefly Valley — playable study" data-src="projects/particle-galaxy/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/particle-galaxy/">Open full screen ↗</a>
+            <span class="pstat">No.17 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
+    <li class="pitem" style="--acc:#6e7f8a;--accA:rgba(110,127,138,.12)">
+      <div class="prow" role="button" tabindex="0" aria-expanded="false" aria-controls="panel-18" data-demo="projects/kinetic-typo-3d/">
       <span class="pthumb" aria-hidden="true"><canvas width="320" height="200" data-m="letters"></canvas></span>
       <span class="pnum">No.18</span><span class="ptitle">Letters in Wind<span class="cn">风中之字</span></span>
       <span class="pdesc">Three words caught in the wind — CREATE, DESIGN, BUILD orbiting on rings in hard daylight shadow. Click one: it spins, then settles.</span>
-      <span class="ptags">Three.js · TextGeometry</span><span class="parrow">→</span></a></li>
+      <span class="ptags">Three.js · TextGeometry</span><span class="parrow">→</span>
+      </div>
+      <div class="ppanel" id="panel-18"><div class="ppin"><div class="ppad">
+        <div class="pprose">
+          <p class="pconcept">三个字被风从纸上吹了起来。</p>
+          <p class="pcraft">CREATE · DESIGN · BUILD 在三道环上公转，正午阳光下投出利落的影。点中哪个，哪个就兴奋地打转再归位。</p>
+          <div class="pcheat"><span class="ptag">TextGeometry</span><span class="ptag">环形排布</span><span class="ptag">Three.js</span><span class="phint"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M2.5 7l2.4-2.4M2.5 7l2.4 2.4M11.5 7L9.1 4.6M11.5 7l-2.4 2.4"/></svg><i>旋转视角</i></span><span class="phint"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="2"/><circle cx="7" cy="7" r="5.2" opacity=".5"/></svg><i>点词加速</i></span></div>
+        </div>
+        <div class="pdemo">
+          <div class="pframe"><iframe loading="lazy" title="No.18 Letters in Wind — playable study" data-src="projects/kinetic-typo-3d/?embed=1" tabindex="-1"></iframe></div>
+          <div class="pdemo-bar">
+            <a class="popen" href="projects/kinetic-typo-3d/">Open full screen ↗</a>
+            <span class="pstat">No.18 · Interactive · Live <svg width="30" height="9" viewBox="0 0 30 9" aria-hidden="true"><path d="M1 6.5 C 7 4, 15 2.5, 29 1.5 C 23 3.5, 10 6.5, 1 6.5 Z" fill="#c8442a" opacity=".8"/></svg></span>
+          </div>
+        </div>
+      </div></div></div>
+    </li>
   </ul>
 </section>
 
