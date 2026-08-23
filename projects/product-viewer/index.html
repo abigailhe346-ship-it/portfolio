@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Product Viewer — 3D—01</title>
+<title>Morning Dew — Plein Air No.14</title>
 <style>
 .topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:difference;color:#fff;pointer-events:none}
 .topbar a{color:#fff;text-decoration:none;pointer-events:auto}
@@ -13,26 +13,30 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden}
-body{background:radial-gradient(120% 90% at 50% 28%,#17181d 0%,#0a0a0c 60%,#060607 100%);font-family:'Space Grotesk',sans-serif;color:#ece9e2;-webkit-font-smoothing:antialiased}
+body{background:linear-gradient(180deg,#e6e9df 0%,#c2cdbf 55%,#9fb2a8 100%);font-family:'Space Grotesk',sans-serif;color:#2a2e28;-webkit-font-smoothing:antialiased}
 #c{position:fixed;inset:0;display:block;touch-action:none}
 .brand{position:fixed;left:34px;bottom:120px;pointer-events:none;user-select:none;z-index:5}
-.brand h1{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:clamp(58px,9vw,118px);line-height:.88;color:#f2efe8}
-.brand p{margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.3em;color:rgba(236,233,226,.45)}
+.brand h1{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:clamp(58px,9vw,118px);line-height:.88;color:#2a2e28}
+.brand p{margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.3em;color:rgba(42,46,40,.55)}
 .ui{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center;z-index:10;max-width:94vw}
 .mats{display:flex;gap:6px}
-.pill{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(236,233,226,.6);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:9px 15px;cursor:pointer;transition:color .25s ease,border-color .25s ease,background .25s ease}
-.pill:hover{color:#fff;border-color:rgba(255,255,255,.42)}
-.pill.active{background:#ece9e2;color:#0a0a0c;border-color:#ece9e2}
-.swatches{display:flex;gap:10px;align-items:center;padding-left:16px;border-left:1px solid rgba(255,255,255,.12)}
-.sw{width:22px;height:22px;border-radius:50%;border:1px solid rgba(255,255,255,.28);background:var(--c);cursor:pointer;transition:transform .3s cubic-bezier(.2,1.5,.4,1)}
+.pill{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(42,46,40,.62);background:rgba(255,255,255,.18);border:1px solid rgba(42,46,40,.22);border-radius:999px;padding:9px 15px;cursor:pointer;transition:color .25s ease,border-color .25s ease,background .25s ease}
+.pill:hover{color:#2a2e28;border-color:rgba(42,46,40,.55)}
+.pill.active{background:#2a2e28;color:#eef0e8;border-color:#2a2e28}
+.swatches{display:flex;gap:10px;align-items:center;padding-left:16px;border-left:1px solid rgba(42,46,40,.18)}
+.sw{width:22px;height:22px;border-radius:50%;border:1px solid rgba(42,46,40,.3);background:var(--c);cursor:pointer;transition:transform .3s cubic-bezier(.2,1.5,.4,1)}
 .sw:hover{transform:scale(1.18)}
-.sw.active{box-shadow:0 0 0 2px #0a0a0c,0 0 0 3.5px #ece9e2}
-.stats{position:fixed;right:26px;bottom:30px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(236,233,226,.42);z-index:10;pointer-events:none}
+.sw.active{box-shadow:0 0 0 2px #e6e9df,0 0 0 3.5px #2a2e28}
+.stats{position:fixed;right:26px;bottom:64px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(42,46,40,.5);z-index:10;pointer-events:none;text-align:right;line-height:1.9}
+.seal{position:fixed;right:22px;bottom:18px;z-index:100;display:flex;align-items:center;gap:9px;pointer-events:none;user-select:none;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(42,46,40,.62)}
+.seal svg{display:block;width:44px;height:29px}
+.grain{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.05;mix-blend-mode:multiply;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");background-size:260px 260px}
 @media(max-width:680px){
-  .brand{left:20px;bottom:158px}
+  .brand{left:20px;bottom:172px}
   .brand h1{font-size:56px}
   .stats{display:none}
   .ui{gap:10px;bottom:18px}
+  .seal{bottom:88px}
 }
 </style>
 <script type="importmap">
@@ -45,23 +49,29 @@ body{background:radial-gradient(120% 90% at 50% 28%,#17181d 0%,#0a0a0c 60%,#0606
 </script>
 </head>
 <body>
-<div class="topbar"><a href="../../index.html">← Index</a><span>3D—01 · Product Viewer</span></div>
+<div class="topbar"><a href="../../index.html">← Index</a><span>Plein Air — No.14</span></div>
 <canvas id="c"></canvas>
-<div class="brand"><h1>Noé</h1><p>EAU DE PARFUM · 50 ML</p></div>
+<div class="brand"><h1>Rosée</h1><p>EAU DE PARFUM · 50 ML · MORNING DEW</p></div>
 <div class="ui">
   <div class="mats">
     <button class="pill active" data-mat="glass">Glass</button>
     <button class="pill" data-mat="metal">Brushed Metal</button>
     <button class="pill" data-mat="ceramic">Matte Ceramic</button>
+    <button class="pill" data-mat="dew">Dew</button>
   </div>
   <div class="swatches">
-    <button class="sw active" data-c="#d9b08c" style="--c:#d9b08c" aria-label="amber"></button>
-    <button class="sw" data-c="#a8c3d1" style="--c:#a8c3d1" aria-label="glacier"></button>
-    <button class="sw" data-c="#e8e4dd" style="--c:#e8e4dd" aria-label="porcelain"></button>
-    <button class="sw" data-c="#3c414c" style="--c:#3c414c" aria-label="noir"></button>
+    <button class="sw active" data-c="#d9a441" style="--c:#d9a441" aria-label="haystack gold"></button>
+    <button class="sw" data-c="#e8b7c3" style="--c:#e8b7c3" aria-label="waterlily pink"></button>
+    <button class="sw" data-c="#7ba8a0" style="--c:#7ba8a0" aria-label="pond reflection"></button>
+    <button class="sw" data-c="#8d7fb8" style="--c:#8d7fb8" aria-label="lavender shadow"></button>
   </div>
 </div>
-<div class="stats"><span id="tris">······</span> TRIS</div>
+<div class="stats"><span id="clock">05:50</span> · <span id="tris">······</span> TRIS</div>
+<div class="seal">
+  <svg viewBox="0 0 52 34" aria-hidden="true"><path d="M7 21C13 9 25 6 32 10c6 3.4 3.6 9.6-2.4 10.6-4.8.8-8.4-2.4-6.6-6.8" fill="none" stroke="#c8442a" stroke-width="4.4" stroke-linecap="round" opacity=".9"/><path d="M11 27.5c9.5-4.4 23-5.2 34-1.8" fill="none" stroke="#c8442a" stroke-width="2.4" stroke-linecap="round" opacity=".45"/></svg>
+  <span>Plein Air — No.14</span>
+</div>
+<div class="grain"></div>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -70,33 +80,80 @@ import { Reflector } from 'three/addons/objects/Reflector.js';
 
 const canvas = document.getElementById('c');
 const DPR = Math.min(window.devicePixelRatio || 1, 2);
+const MOBILE = window.matchMedia('(pointer:coarse)').matches || window.innerWidth < 700;
 
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(DPR);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.12;
+renderer.toneMappingExposure = 1.05;
 renderer.info.autoReset = false;
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 60);
 camera.position.set(3.1, 1.9, 4.3);
 
+/* dawn grey-green gradient sky */
+{
+  const bgc = document.createElement('canvas');
+  bgc.width = 2; bgc.height = 512;
+  const b = bgc.getContext('2d');
+  const g = b.createLinearGradient(0, 0, 0, 512);
+  g.addColorStop(0, '#eceee5');
+  g.addColorStop(0.42, '#cdd6c8');
+  g.addColorStop(0.75, '#a9bcae');
+  g.addColorStop(1, '#93a89c');
+  b.fillStyle = g;
+  b.fillRect(0, 0, 2, 512);
+  const bgTex = new THREE.CanvasTexture(bgc);
+  bgTex.colorSpace = THREE.SRGBColorSpace;
+  scene.background = bgTex;
+}
+
 const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.06).texture;
+scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
 pmrem.dispose();
 
-/* three-point lighting */
-const key = new THREE.SpotLight(0xffffff, 3.4, 0, 0.55, 0.6, 0);
-key.position.set(4, 6.5, 3);
+/* komorebi gobo — soft leaf-gap dapple, also reused as the floor decal */
+function makeKomorebiTexture(alpha) {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 512;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = alpha ? 'rgba(0,0,0,0)' : '#000';
+  ctx.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 46; i++) {
+    const x = 40 + Math.random() * 432;
+    const y = 40 + Math.random() * 432;
+    const r = 12 + Math.random() * 46;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    const a = 0.25 + Math.random() * 0.65;
+    g.addColorStop(0, `rgba(255,250,236,${a})`);
+    g.addColorStop(0.6, `rgba(255,250,236,${a * 0.4})`);
+    g.addColorStop(1, 'rgba(255,250,236,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+/* dawn lighting — one gobo spotlight as the morning sun through leaves */
+const key = new THREE.SpotLight(0xffd2a8, 2.6, 0, 0.62, 0.55, 0);
+key.position.set(5, 6.2, 2.5);
+key.map = makeKomorebiTexture(false);
 scene.add(key);
-const fill = new THREE.DirectionalLight(0xbcd0ff, 0.5);
+scene.add(key.target);
+const fill = new THREE.DirectionalLight(0xbccdc2, 0.55);
 fill.position.set(-5, 3, -1.5);
 scene.add(fill);
-const rim = new THREE.DirectionalLight(0xffffff, 1.4);
+const rim = new THREE.DirectionalLight(0xfff0da, 1.1);
 rim.position.set(-1.5, 5, -6);
 scene.add(rim);
-scene.add(new THREE.AmbientLight(0x30323a, 0.55));
+const amb = new THREE.AmbientLight(0x6a7a70, 0.6);
+scene.add(amb);
 
 /* procedural perfume bottle */
 const profilePts = [
@@ -104,6 +161,17 @@ const profilePts = [
   [0.585, 0.5], [0.565, 0.78], [0.51, 1.0], [0.415, 1.17], [0.305, 1.28],
   [0.24, 1.36], [0.218, 1.44], [0.212, 1.5]
 ].map(p => new THREE.Vector2(p[0], p[1]));
+
+function radiusAt(y) {
+  for (let i = 0; i < profilePts.length - 1; i++) {
+    const a = profilePts[i], b = profilePts[i + 1];
+    if (y >= a.y && y <= b.y) {
+      const t = b.y === a.y ? 0 : (y - a.y) / (b.y - a.y);
+      return a.x + (b.x - a.x) * t;
+    }
+  }
+  return profilePts[profilePts.length - 1].x;
+}
 
 const bottle = new THREE.Group();
 const body = new THREE.Mesh(new THREE.LatheGeometry(profilePts, 96));
@@ -119,12 +187,39 @@ collar.position.y = 1.51;
 bottle.add(collar);
 scene.add(bottle);
 
-/* mirror floor + vignette veil */
+/* dew droplets — instanced beads clinging to the shoulder (Dew mode) */
+const DEW_N = MOBILE ? 260 : 640;
+const dewMat = new THREE.MeshPhysicalMaterial({
+  color: 0xf4faf6, metalness: 0, roughness: 0.04, clearcoat: 1,
+  clearcoatRoughness: 0.03, envMapIntensity: 2.2, transparent: true, opacity: 0.88
+});
+const dew = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), dewMat, DEW_N);
+dew.visible = false;
+const dewData = [];
+{
+  const dummy = new THREE.Object3D();
+  for (let i = 0; i < DEW_N; i++) {
+    const y = 0.9 + Math.pow(Math.random(), 1.4) * 0.55; // shoulder band
+    const ang = Math.random() * Math.PI * 2;
+    const r = radiusAt(y) + 0.004;
+    const s = 0.008 + Math.pow(Math.random(), 2.2) * 0.024;
+    const d = { x: Math.cos(ang) * r, y, z: Math.sin(ang) * r, s, delay: Math.random() * 0.55 };
+    dewData.push(d);
+    dummy.position.set(d.x, d.y, d.z);
+    dummy.scale.setScalar(0.0001);
+    dummy.updateMatrix();
+    dew.setMatrixAt(i, dummy.matrix);
+  }
+}
+bottle.add(dew);
+let dewAnim = -1; // -1 idle, otherwise 0..1 grow-in progress
+
+/* mirror floor + mist veil + drifting komorebi decal */
 const mirror = new Reflector(new THREE.CircleGeometry(9, 72), {
   clipBias: 0.003,
-  textureWidth: Math.floor(window.innerWidth * DPR),
-  textureHeight: Math.floor(window.innerHeight * DPR),
-  color: 0x1c1d22
+  textureWidth: Math.floor(window.innerWidth * DPR * (MOBILE ? 0.5 : 1)),
+  textureHeight: Math.floor(window.innerHeight * DPR * (MOBILE ? 0.5 : 1)),
+  color: 0x8ea398
 });
 mirror.rotation.x = -Math.PI / 2;
 scene.add(mirror);
@@ -133,9 +228,9 @@ const gc = document.createElement('canvas');
 gc.width = gc.height = 512;
 const g2 = gc.getContext('2d');
 const grad = g2.createRadialGradient(256, 256, 30, 256, 256, 256);
-grad.addColorStop(0, 'rgba(10,10,12,0.05)');
-grad.addColorStop(0.45, 'rgba(10,10,12,0.34)');
-grad.addColorStop(1, 'rgba(10,10,12,1)');
+grad.addColorStop(0, 'rgba(147,168,156,0.02)');
+grad.addColorStop(0.45, 'rgba(147,168,156,0.28)');
+grad.addColorStop(1, 'rgba(128,150,138,0.95)');
 g2.fillStyle = grad;
 g2.fillRect(0, 0, 512, 512);
 const veil = new THREE.Mesh(
@@ -146,6 +241,19 @@ veil.rotation.x = -Math.PI / 2;
 veil.position.y = 0.002;
 scene.add(veil);
 
+const komoTex = makeKomorebiTexture(true);
+komoTex.wrapS = komoTex.wrapT = THREE.RepeatWrapping;
+const komo = new THREE.Mesh(
+  new THREE.PlaneGeometry(15, 15),
+  new THREE.MeshBasicMaterial({
+    map: komoTex, color: 0xfff0c8, transparent: true, opacity: 0.28,
+    blending: THREE.AdditiveBlending, depthWrite: false
+  })
+);
+komo.rotation.x = -Math.PI / 2;
+komo.position.y = 0.006;
+scene.add(komo);
+
 /* materials */
 const MATS = {
   glass: c => new THREE.MeshPhysicalMaterial({
@@ -154,14 +262,21 @@ const MATS = {
     clearcoat: 1, clearcoatRoughness: 0.06, envMapIntensity: 1.15
   }),
   metal: c => new THREE.MeshPhysicalMaterial({ color: c, metalness: 1, roughness: 0.3, envMapIntensity: 1.15 }),
-  ceramic: c => new THREE.MeshPhysicalMaterial({ color: c, metalness: 0, roughness: 0.9, envMapIntensity: 0.7 })
+  ceramic: c => new THREE.MeshPhysicalMaterial({ color: c, metalness: 0, roughness: 0.9, envMapIntensity: 0.7 }),
+  dew: c => new THREE.MeshPhysicalMaterial({
+    color: c, metalness: 0, roughness: 0.03, transmission: 1, thickness: 0.9, ior: 1.4,
+    attenuationColor: new THREE.Color(c), attenuationDistance: 2.2,
+    clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.4
+  })
 };
 let curMat = 'glass';
-let curColor = '#d9b08c';
+let curColor = '#d9a441';
 function applyMaterial() {
   const m = MATS[curMat](curColor);
   if (body.material) body.material.dispose();
   body.material = m;
+  if (curMat === 'dew' && !dew.visible) { dew.visible = true; dewAnim = 0; }
+  if (curMat !== 'dew') dew.visible = false;
 }
 applyMaterial();
 
@@ -197,23 +312,79 @@ let resumeT = null;
 controls.addEventListener('start', () => { controls.autoRotate = false; if (resumeT) clearTimeout(resumeT); });
 controls.addEventListener('end', () => { resumeT = setTimeout(() => { controls.autoRotate = true; }, 2600); });
 
-/* loop */
+/* pointer gently steers the morning sun */
+let mx = 0, my = 0, smx = 0, smy = 0;
+window.addEventListener('pointermove', e => {
+  mx = (e.clientX / window.innerWidth) * 2 - 1;
+  my = (e.clientY / window.innerHeight) * 2 - 1;
+}, { passive: true });
+
+/* world state — a slow dawn loop: 05:50 → 06:50, light warms as the sun climbs */
 const trisEl = document.getElementById('tris');
+const clockEl = document.getElementById('clock');
+const keyWarm = new THREE.Color(0xffd2a8);
+const keyHigh = new THREE.Color(0xfff3e0);
 let rafId = null;
 let last = performance.now();
 let frame = 0;
 
-function tick() {
+function tick(dt, t) {
   controls.update();
+
+  /* dawn clock: 90 s real = 60 min in-scene, loops */
+  const dayT = (t % 90) / 90;
+  const mins = 350 + dayT * 60;
+  const hh = String(Math.floor(mins / 60)).padStart(2, '0');
+  const mm = String(Math.floor(mins % 60)).padStart(2, '0');
+  const warm = dayT * dayT * (3 - 2 * dayT);
+
+  smx += (mx - smx) * 0.04;
+  smy += (my - smy) * 0.04;
+
+  /* gobo sun drifts on a slow arc, pointer nudges it */
+  key.position.set(5 + Math.sin(t * 0.05) * 1.3 + smx * 1.1, 6.2 + warm * 1.4, 2.5 + Math.cos(t * 0.041) * 1.1);
+  key.target.position.set(smx * 0.6, 0.8, -smy * 0.5);
+  key.intensity = 2.3 + warm * 1.5;
+  key.color.lerpColors(keyWarm, keyHigh, warm);
+  amb.intensity = 0.55 + warm * 0.35;
+  rim.intensity = 1.0 + warm * 0.6;
+
+  /* komorebi floor decal drifts like light through moving leaves */
+  komoTex.offset.x = t * 0.006 + smx * 0.03;
+  komoTex.offset.y = t * 0.0045;
+  komo.rotation.z = Math.sin(t * 0.03) * 0.12;
+  komo.material.opacity = 0.2 + warm * 0.22;
+
+  /* dew grow-in */
+  if (dewAnim >= 0) {
+    dewAnim = Math.min(1, dewAnim + dt * 1.4);
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < DEW_N; i++) {
+      const d = dewData[i];
+      const k = Math.min(1, Math.max(0, (dewAnim - d.delay) / (1 - d.delay)));
+      const s = d.s * (k <= 0 ? 0.0001 : k * (1.6 - 0.6 * k)); // soft overshoot
+      dummy.position.set(d.x, d.y, d.z);
+      dummy.scale.setScalar(Math.max(0.0001, s));
+      dummy.updateMatrix();
+      dew.setMatrixAt(i, dummy.matrix);
+    }
+    dew.instanceMatrix.needsUpdate = true;
+    if (dewAnim >= 1) dewAnim = -1;
+  }
+
   renderer.info.reset();
   renderer.render(scene, camera);
   frame++;
-  if (frame % 30 === 0) trisEl.textContent = renderer.info.render.triangles.toLocaleString('en-US');
+  if (frame % 30 === 0) {
+    trisEl.textContent = renderer.info.render.triangles.toLocaleString('en-US');
+    clockEl.textContent = hh + ':' + mm;
+  }
 }
 function loop(now) {
   rafId = requestAnimationFrame(loop);
+  const dt = Math.min((now - last) / 1000, 0.05);
   last = now;
-  tick();
+  tick(dt, now / 1000);
 }
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
@@ -230,8 +401,8 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
   mirror.getRenderTarget().setSize(
-    Math.floor(window.innerWidth * DPR),
-    Math.floor(window.innerHeight * DPR)
+    Math.floor(window.innerWidth * DPR * (MOBILE ? 0.5 : 1)),
+    Math.floor(window.innerHeight * DPR * (MOBILE ? 0.5 : 1))
   );
 });
 

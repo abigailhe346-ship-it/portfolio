@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>GEN—04 · Perlin Landscape</title>
+<title>Plein Air — No.04 · Mist Mountains</title>
 <style>
 .topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:difference;color:#fff;pointer-events:none}
 .topbar a{color:#fff;text-decoration:none;pointer-events:auto}
@@ -11,226 +11,291 @@
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  html,body{margin:0;padding:0;height:100%;overflow:hidden}
-  canvas{display:block;width:100vw;height:100vh}
-  .toggle{
-    position:fixed;top:56px;right:24px;z-index:20;
-    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
-    background:transparent;border:1px solid currentColor;border-radius:999px;padding:9px 20px;cursor:pointer;
-    transition:color .8s ease,border-color .8s ease;-webkit-tap-highlight-color:transparent;
-  }
-  .toggle:hover{opacity:.75}
-  .caption{position:fixed;left:24px;bottom:22px;z-index:10;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;pointer-events:none;line-height:1.9;transition:color .8s ease}
-  .sig{position:fixed;left:24px;top:64px;z-index:10;pointer-events:none}
-  .sig h1{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:clamp(26px,3.4vw,44px);margin:0;line-height:1.05;transition:color .8s ease}
+html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#f2ede0}
+canvas{display:block;width:100vw;height:100vh;cursor:crosshair;touch-action:none}
+.title{position:fixed;left:24px;top:62px;z-index:10;pointer-events:none;mix-blend-mode:difference}
+.title h1{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:clamp(26px,3.6vw,48px);color:#fff;margin:0;line-height:1.05}
+.title p{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5);margin:8px 0 0}
+.hud{position:fixed;right:24px;top:62px;z-index:10;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55);text-align:right;pointer-events:none;line-height:1.9;mix-blend-mode:difference}
+.hint{position:fixed;left:24px;bottom:20px;z-index:10;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.42);pointer-events:none;line-height:1.9;mix-blend-mode:difference}
+.signet{position:fixed;right:22px;bottom:16px;z-index:90;display:flex;align-items:center;gap:10px;pointer-events:none}
+.signet svg{width:38px;height:38px;display:block}
+.signet span{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#c8442a;opacity:.92}
+.grain{position:fixed;inset:0;width:100%;height:100%;z-index:80;pointer-events:none;opacity:.05;mix-blend-mode:overlay}
+@media (max-width:760px){.hud{top:112px}.hint{font-size:9px;max-width:56vw}}
 </style>
 </head>
 <body>
-<div class="topbar"><a href="../../index.html">← Index</a><span>GEN—04 · Perlin Landscape</span></div>
-<div class="sig"><h1 id="ttl">Seven Ridges, One Wind</h1></div>
-<button class="toggle" id="toggle">Dusk</button>
-<div class="caption" id="cap">mouse Y — parallax amplitude<br>auto drift — 0.18 px/frame</div>
+<div class="topbar"><a href="../../index.html">← Index</a><span>Plein Air — No.04</span></div>
 <canvas id="c"></canvas>
+<div class="title"><h1>Mist Mountains</h1><p>Woodcut ridges, drifting fog — a 90-second day</p></div>
+<div class="hud" id="hud"></div>
+<div class="hint">move ↑↓ — parallax · move ←→ — part the near mist<br>click / tap — startle or summon a flock</div>
+<div class="signet">
+  <svg viewBox="0 0 64 64" aria-hidden="true">
+    <path d="M12 44c1-12 8-26 22-31 8-3 16-2 20 2-7 1-14 6-19 13-6 8-9 17-16 20-4 2-7-1-7-4z" fill="#c8442a" opacity=".92"/>
+    <path d="M14 53c9-2 22-5 32-13-3 7-15 14-27 15-5 .5-7-1-5-2z" fill="#c8442a" opacity=".55"/>
+    <path d="M10 36c3-3 9-4 13-3-2 4-9 6-13 5-3-.6-3-1 0-2z" fill="#c8442a" opacity=".32"/>
+  </svg>
+  <span>Plein Air — No.04</span>
+</div>
+<svg class="grain" aria-hidden="true"><filter id="grainF"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#grainF)"/></svg>
 <script>
 (function(){
-  'use strict';
-  var canvas = document.getElementById('c');
-  var ctx = canvas.getContext('2d');
-  var DPR = Math.min(window.devicePixelRatio || 1, 2);
-  var W = 0, H = 0;
+'use strict';
+var canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+var hud=document.getElementById('hud');
+var DPR=1,W=0,H=0;
+var isMobile=(navigator.maxTouchPoints>0&&Math.min(innerWidth,innerHeight)<820)||Math.min(innerWidth,innerHeight)<640;
 
-  /* ---------- Perlin 1D (from 2D improved noise) ---------- */
-  var perm = new Uint8Array(512);
-  (function(){
-    var p = [], i;
-    for (i = 0; i < 256; i++) p[i] = i;
-    var seed = 4242;
-    function rnd(){ seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
-    for (i = 255; i > 0; i--){
-      var j = Math.floor(rnd() * (i + 1));
-      var t = p[i]; p[i] = p[j]; p[j] = t;
+function clamp(v,a,b){return v<a?a:v>b?b:v}
+function lerp(a,b,t){return a+(b-a)*t}
+function hx(h){return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]}
+function mix3(a,b,t){return [lerp(a[0],b[0],t),lerp(a[1],b[1],t),lerp(a[2],b[2],t)]}
+function rgba(c,a){return 'rgba('+(c[0]|0)+','+(c[1]|0)+','+(c[2]|0)+','+a+')'}
+
+/* ---------- Perlin noise ---------- */
+var perm=new Uint8Array(512);
+(function(){var p=[],i;for(i=0;i<256;i++)p[i]=i;var seed=4417;
+function rnd(){seed=(seed*16807)%2147483647;return seed/2147483647}
+for(i=255;i>0;i--){var j=Math.floor(rnd()*(i+1)),t=p[i];p[i]=p[j];p[j]=t}
+for(i=0;i<512;i++)perm[i]=p[i&255]})();
+function fade(t){return t*t*t*(t*(t*6-15)+10)}
+function grad(h,x,y,z){h&=15;var u=h<8?x:y,v=h<4?y:(h===12||h===14?x:z);return((h&1)?-u:u)+((h&2)?-v:v)}
+function noise3(x,y,z){
+  var X=Math.floor(x)&255,Y=Math.floor(y)&255,Z=Math.floor(z)&255;
+  x-=Math.floor(x);y-=Math.floor(y);z-=Math.floor(z);
+  var u=fade(x),v=fade(y),w=fade(z);
+  var A=perm[X]+Y,AA=perm[A]+Z,AB=perm[A+1]+Z,B=perm[X+1]+Y,BA=perm[B]+Z,BB=perm[B+1]+Z;
+  return lerp(lerp(lerp(grad(perm[AA],x,y,z),grad(perm[BA],x-1,y,z),u),lerp(grad(perm[AB],x,y-1,z),grad(perm[BB],x-1,y-1,z),u),v),
+              lerp(lerp(grad(perm[AA+1],x,y,z-1),grad(perm[BA+1],x-1,y,z-1),u),lerp(grad(perm[AB+1],x,y-1,z-1),grad(perm[BB+1],x-1,y-1,z-1),u),v),w);
+}
+function fbm1(x,seed){
+  var v=0,a=.5,f=x;
+  for(var o=0;o<4;o++){v+=a*noise3(f,seed,0);f*=2.13;a*=.5}
+  return v;
+}
+
+/* ---------- day-cycle keyframes (90 s loop) ---------- */
+var KC=[
+ {t:0,  name:'Paper & Ink — Day',       top:'#f2ede0',bot:'#e8dfc8',ink:'#2a2e28',mist:'#ffffff',mistA:.5, body:'#d9a441',bodyY:.24,bodyGlow:.5},
+ {t:.33,name:'Twilight — Ember Dusk',   top:'#1c2340',bot:'#c96f35',ink:'#241f30',mist:'#8d7fb8',mistA:.36,body:'#e07b39',bodyY:.7, bodyGlow:.7},
+ {t:.66,name:'Fluorescent Dawn — Cyan', top:'#0e2a2e',bot:'#2e5a5c',ink:'#0a1c20',mist:'#8fe8dc',mistA:.55,body:'#e8e4d8',bodyY:.2, bodyGlow:.45},
+ {t:1,  name:'Paper & Ink — Day',       top:'#f2ede0',bot:'#e8dfc8',ink:'#2a2e28',mist:'#ffffff',mistA:.5, body:'#d9a441',bodyY:.24,bodyGlow:.5}
+];
+KC.forEach(function(k){k.topN=hx(k.top);k.botN=hx(k.bot);k.inkN=hx(k.ink);k.mistN=hx(k.mist);k.bodyN=hx(k.body)});
+var CYC=90;
+function envAt(c){
+  var i=0;
+  while(i<KC.length-2&&c>KC[i+1].t)i++;
+  var a=KC[i],b=KC[i+1],t=clamp((c-a.t)/Math.max(.0001,b.t-a.t),0,1);
+  return{top:mix3(a.topN,b.topN,t),bot:mix3(a.botN,b.botN,t),ink:mix3(a.inkN,b.inkN,t),
+         mist:mix3(a.mistN,b.mistN,t),mistA:lerp(a.mistA,b.mistA,t),
+         body:mix3(a.bodyN,b.bodyN,t),bodyY:lerp(a.bodyY,b.bodyY,t),bodyGlow:lerp(a.bodyGlow,b.bodyGlow,t),
+         name:(t<.5?a:b).name};
+}
+
+/* ---------- ridges & mist ---------- */
+var LAYERS=isMobile?5:6;
+var mistBlobs=[];
+function buildMist(){
+  mistBlobs.length=0;
+  for(var i=0;i<LAYERS;i++){
+    var n=isMobile?2:3;
+    for(var k=0;k<n;k++){
+      mistBlobs.push({
+        layer:i,
+        x:Math.random()*W,
+        yRel:.25+Math.random()*.55,
+        rx:90+Math.random()*150,ry:13+Math.random()*20,
+        vx:(Math.random()<.5?-1:1)*(3+Math.random()*9),
+        part:0,ph:Math.random()*6.283
+      });
     }
-    for (i = 0; i < 512; i++) perm[i] = p[i & 255];
-  })();
-  function fade(t){ return t * t * t * (t * (t * 6 - 15) + 10); }
-  function lerp(a, b, t){ return a + t * (b - a); }
-  function grad1(h, x){ return (h & 1) ? -x : x; }
-  function noise1(x){
-    var X = Math.floor(x) & 255;
-    x -= Math.floor(x);
-    var u = fade(x);
-    return lerp(grad1(perm[X], x), grad1(perm[X + 1], x - 1), u) * 2;
   }
-  function ridge(x, oct){
-    // ridged fbm: sharp crests -> woodcut look
-    var f = 0, a = 0.55, fr = 1;
-    for (var i = 0; i < oct; i++){
-      var n = 1 - Math.abs(noise1(x * fr));
-      n = n * n;
-      f += n * a;
-      a *= 0.5; fr *= 2.1;
+}
+function ridgeBase(i){return H*(.32+i*(.56/LAYERS))}
+function ridgeAmp(i){return H*(.11-i*.009)}
+function ridgeY(i,x,t,parY){
+  var off=t*(2+i*4.5);
+  return ridgeBase(i)+parY*(i+1)*7-fbm1(x*(.0015+i*.00035)+off*.004,i*17.31)*ridgeAmp(i);
+}
+
+/* ---------- birds ---------- */
+var flock=null,nextFlock=7+Math.random()*8;
+function spawnFlock(){
+  var dir=Math.random()<.5?1:-1,n=5+Math.floor(Math.random()*5);
+  var cx=dir>0?-40:W+40,cy=H*(.14+Math.random()*.3),birds=[],i;
+  for(i=0;i<n;i++){
+    birds.push({x:cx+(Math.random()-.5)*70,y:cy+(Math.random()-.5)*50,
+                vx:dir*(40+Math.random()*30),vy:(Math.random()-.5)*14,
+                ph:Math.random()*6.283,sz:6+Math.random()*4});
+  }
+  flock={birds:birds,dir:dir,startleT:0,startled:false};
+}
+function startle(){
+  if(!flock||flock.startleT>0)return;
+  flock.startleT=.9;flock.startled=true;
+  for(var i=0;i<flock.birds.length;i++){var b=flock.birds[i];
+    b.vx+=(Math.random()-.5)*220;b.vy+=(Math.random()-.7)*180;
+  }
+}
+function updateFlock(dt){
+  if(!flock)return;
+  var bs=flock.birds,n=bs.length,i,j;
+  var cx=0,cy=0,ax=0,ay=0;
+  for(i=0;i<n;i++){cx+=bs[i].x;cy+=bs[i].y;ax+=bs[i].vx;ay+=bs[i].vy}
+  cx/=n;cy/=n;ax/=n;ay/=n;
+  var tx=flock.dir>0?W+120:-120,ty=H*.22;
+  for(i=0;i<n;i++){var b=bs[i];
+    b.vx+=(cx-b.x)*.35*dt*2;b.vy+=(cy-b.y)*.35*dt*2;      /* cohesion */
+    b.vx+=(ax-b.vx)*1.4*dt;b.vy+=(ay-b.vy)*1.4*dt;        /* alignment */
+    for(j=0;j<n;j++){if(j===i)continue;                   /* separation */
+      var dx=b.x-bs[j].x,dy=b.y-bs[j].y,d2=dx*dx+dy*dy;
+      if(d2<400&&d2>.01){var d=Math.sqrt(d2);b.vx+=dx/d*26*dt;b.vy+=dy/d*26*dt}
     }
-    return f;
+    if(flock.startleT<=0){b.vx+=(tx-b.x)*.12*dt;b.vy+=(ty-b.y)*.1*dt}
+    b.ph+=dt*(7+Math.sqrt(b.vx*b.vx+b.vy*b.vy)*.06);
+    b.x+=b.vx*dt;b.y+=b.vy*dt;
   }
+  if(flock.startleT>0)flock.startleT-=dt;
+  flock.cx=cx;flock.cy=cy;
+  /* pointer proximity startles */
+  if(flock.startleT<=0){
+    var pdx=cx-mx,pdy=cy-my;
+    if(pdx*pdx+pdy*pdy<19600)startle();
+  }
+  var done=true;
+  for(i=0;i<n;i++){if(bs[i].x>-80&&bs[i].x<W+80)done=false}
+  if(done)flock=null;
+}
 
-  /* ---------- themes ---------- */
-  function rgb(h){
-    return [parseInt(h.substr(1,2),16), parseInt(h.substr(3,2),16), parseInt(h.substr(5,2),16)];
-  }
-  // Dawn: paper white bg, black ink lines, fills from light grey (far) to near-black... keep fills pale
-  // Dusk: deep blue bg #0d1626, fluorescent cyan lines #7ee8fa
-  var THEMES = {
-    dawn: {
-      bg: rgb('#f4f1e8'),
-      ink: rgb('#111111'),
-      fills: ['#e6e2d6','#d9d4c6','#cbc5b5','#bcb5a3','#a79f8b','#8d8570','#6d6654','#3a352c'].map(rgb),
-      glow: 0
-    },
-    dusk: {
-      bg: rgb('#0d1626'),
-      ink: rgb('#7ee8fa'),
-      fills: ['#132037','#111d33','#0f1a2e','#0e1829','#0c1524','#0a1220','#080f1b','#060b14'].map(rgb),
-      glow: 1
+/* ---------- input ---------- */
+var mx=-9999,my=-9999,mxS=-9999,myS=-9999;
+canvas.addEventListener('pointermove',function(e){mx=e.clientX;my=e.clientY});
+canvas.addEventListener('pointerdown',function(e){
+  mx=e.clientX;my=e.clientY;
+  if(flock)startle();else spawnFlock();
+});
+
+/* ---------- draw ---------- */
+function drawRidge(i,env,t,parY){
+  var step=isMobile?9:6,x,y;
+  var farK=i/(LAYERS-1); /* 0 far → 1 near */
+  var inkC=mix3(mix3(env.ink,env.top,.72),env.ink,farK);
+  ctx.fillStyle=rgba(inkC,1);
+  ctx.beginPath();
+  ctx.moveTo(-20,H+20);
+  for(x=-20;x<=W+20;x+=step)ctx.lineTo(x,ridgeY(i,x,t,parY));
+  ctx.lineTo(W+20,H+20);ctx.closePath();ctx.fill();
+  /* woodcut hatching on nearer layers */
+  if(i>=Math.floor(LAYERS/2)){
+    ctx.strokeStyle=rgba(mix3(inkC,env.top,.35),.4);ctx.lineWidth=1;ctx.beginPath();
+    var hstep=isMobile?26:16;
+    for(x=0;x<W;x+=hstep){
+      y=ridgeY(i,x,t,parY);
+      var hl=5+fbm1(x*.01,i*31.7)*10*(i/(LAYERS-1));
+      ctx.moveTo(x,y+2);ctx.lineTo(x+3,y+2+Math.max(2,hl));
     }
-  };
-  var LAYERS = 7; // use 7 ridgelines
-  var themeMix = 0;      // 0 = dawn, 1 = dusk
-  var themeTarget = 0;
-  var toggleBtn = document.getElementById('toggle');
-  var ttl = document.getElementById('ttl');
-  var cap = document.getElementById('cap');
-
-  toggleBtn.addEventListener('click', function(){
-    themeTarget = themeTarget > 0.5 ? 0 : 1;
-    toggleBtn.textContent = themeTarget > 0.5 ? 'Dawn' : 'Dusk';
-  });
-
-  function mixc(a, b, t){
-    return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ',' +
-                    Math.round(a[1] + (b[1] - a[1]) * t) + ',' +
-                    Math.round(a[2] + (b[2] - a[2]) * t) + ')';
+    ctx.stroke();
   }
-
-  /* ---------- mouse parallax ---------- */
-  var mouseYN = 0.5, parallax = 0;
-  window.addEventListener('pointermove', function(e){
-    mouseYN = e.clientY / Math.max(1, window.innerHeight);
-  }, { passive: true });
-
-  /* ---------- resize ---------- */
-  function resize(){
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
-    W = window.innerWidth; H = window.innerHeight;
-    canvas.width = Math.floor(W * DPR);
-    canvas.height = Math.floor(H * DPR);
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  }
-  window.addEventListener('resize', resize);
-  resize();
-
-  /* ---------- loop ---------- */
-  var drift = 0;
-  var running = true, rafId = 0;
-  var STEP = 3;
-
-  function frame(){
-    if (!running) return;
-
-    // smooth theme transition
-    themeMix += (themeTarget - themeMix) * 0.045;
-    if (Math.abs(themeTarget - themeMix) < 0.001) themeMix = themeTarget;
-    var tm = themeMix * themeMix * (3 - 2 * themeMix);
-
-    // smooth parallax amplitude from mouse Y (0.15 .. 1.0)
-    parallax += ((0.15 + mouseYN * 0.85) - parallax) * 0.06;
-
-    var bg = mixc(THEMES.dawn.bg, THEMES.dusk.bg, tm);
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, W, H);
-
-    ttl.style.color = mixc(THEMES.dawn.ink, THEMES.dusk.ink, tm);
-    cap.style.color = tm < 0.5 ? 'rgba(17,17,17,' + (0.45 + tm * 0.1) + ')' : 'rgba(126,232,250,0.5)';
-    toggleBtn.style.color = mixc(THEMES.dawn.ink, THEMES.dusk.ink, tm);
-
-    var ink = mixc(THEMES.dawn.ink, THEMES.dusk.ink, tm);
-    var glow = tm; // glow only in dusk
-    var baseY = H * 0.28;
-    var spreadBase = H * 0.085;
-    var spreadVar = H * 0.075 * parallax;
-
-    // draw far -> near
-    for (var layer = 0; layer < LAYERS; layer++){
-      var depth = layer / (LAYERS - 1); // 0 far, 1 near
-      var ly = baseY + layer * (spreadBase + spreadVar);
-      var amp = (H * 0.11) * (0.35 + depth * 0.85) * (0.6 + parallax * 0.6);
-      var speedF = 0.35 + depth * 1.0;           // near layers drift faster
-      var xoffPx = drift * speedF + layer * 137.7; // pixel-space offset
-      var scale = 0.0018 + depth * 0.0012;
-
-      function ridgeY(px){
-        return ly - ridge((px + xoffPx) * scale, 4) * amp
-                  - ridge((px * 2.6 + xoffPx * 0.5) * scale, 3) * amp * 0.35;
-      }
-
-      var fillA = THEMES.dawn.fills[Math.min(7, layer + 1)];
-      var fillB = THEMES.dusk.fills[Math.min(7, layer + 1)];
-
-      ctx.beginPath();
-      ctx.moveTo(-4, H + 4);
-      var x, y;
-      for (x = -4; x <= W + 4; x += STEP){
-        y = ridgeY(x);
-        ctx.lineTo(x, y);
-      }
-      ctx.lineTo(W + 4, H + 4);
-      ctx.closePath();
-      ctx.fillStyle = mixc(fillA, fillB, tm);
-      ctx.fill();
-
-      // crest stroke — width grows with depth (woodcut hierarchy)
-      var lw = 0.7 + depth * depth * 1.9;
-      if (glow > 0.05){
-        ctx.shadowColor = 'rgba(126,232,250,' + (0.55 * glow) + ')';
-        ctx.shadowBlur = 8 * glow;
-      }
-      ctx.strokeStyle = ink;
-      ctx.lineWidth = lw;
-      ctx.lineJoin = 'round';
-      ctx.beginPath();
-      for (x = -4; x <= W + 4; x += STEP){
-        y = ridgeY(x);
-        if (x === -4) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-
-      // engraved echo line on near layers (double-strike, slightly offset)
-      if (depth > 0.55){
-        ctx.strokeStyle = tm < 0.5 ? 'rgba(17,17,17,0.22)' : 'rgba(126,232,250,' + (0.20 * glow + 0.05) + ')';
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        for (x = -4; x <= W + 4; x += STEP){
-          y = ridgeY(x) + 2.5 + depth * 2.5;
-          if (x === -4) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-      }
+}
+function drawMistBand(i,env,t,dt){
+  var topY=ridgeBase(i),botY=i+1<LAYERS?ridgeBase(i+1):H*1.02;
+  for(var k=0;k<mistBlobs.length;k++){var m=mistBlobs[k];
+    if(m.layer!==i)continue;
+    m.x+=m.vx*dt;
+    if(m.x<-m.rx-40)m.x=W+m.rx;else if(m.x>W+m.rx+40)m.x=-m.rx;
+    var nearK=i/(LAYERS-1);
+    var target=0;
+    if(nearK>.5){
+      var d=m.x-mxS;
+      target=Math.exp(-(d*d)/(220*220))*110*(d>=0?1:-1);
     }
-
-    drift += 0.18;
-    rafId = requestAnimationFrame(frame);
+    m.part+=(target-m.part)*.05;
+    var yy=lerp(topY,botY,m.yRel)+Math.sin(t*.3+m.ph)*8;
+    var a=env.mistA*(.24+.3*nearK);
+    var g=ctx.createRadialGradient(m.x+m.part,yy,0,m.x+m.part,yy,m.rx);
+    g.addColorStop(0,rgba(env.mist,a));
+    g.addColorStop(1,rgba(env.mist,0));
+    ctx.fillStyle=g;
+    ctx.save();
+    ctx.translate(m.x+m.part,yy);ctx.scale(1,m.ry/m.rx);ctx.translate(-(m.x+m.part),-yy);
+    ctx.beginPath();ctx.arc(m.x+m.part,yy,m.rx,0,6.284);ctx.fill();
+    ctx.restore();
   }
-  rafId = requestAnimationFrame(frame);
+}
+function drawFlock(env){
+  if(!flock)return;
+  ctx.strokeStyle=rgba(env.ink,.85);ctx.lineWidth=1.4;
+  for(var i=0;i<flock.birds.length;i++){var b=flock.birds[i];
+    var fl=Math.sin(b.ph)*.9,w=b.sz;
+    ctx.beginPath();
+    ctx.moveTo(b.x-w,b.y-fl*w*.5);
+    ctx.quadraticCurveTo(b.x-w*.4,b.y-fl*w*.9-w*.25,b.x,b.y);
+    ctx.quadraticCurveTo(b.x+w*.4,b.y-fl*w*.9-w*.25,b.x+w,b.y-fl*w*.5);
+    ctx.stroke();
+  }
+}
+function draw(env,t,dt,parY){
+  var g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,rgba(env.top,1));g.addColorStop(1,rgba(env.bot,1));
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  /* celestial body */
+  var bx=W*.7,by=H*env.bodyY,br=H*.045;
+  var rg=ctx.createRadialGradient(bx,by,0,bx,by,br*4);
+  rg.addColorStop(0,rgba(env.body,env.bodyGlow));rg.addColorStop(1,rgba(env.body,0));
+  ctx.fillStyle=rg;ctx.fillRect(bx-br*4,by-br*4,br*8,br*8);
+  ctx.fillStyle=rgba(env.body,.95);
+  ctx.beginPath();ctx.arc(bx,by,br,0,6.284);ctx.fill();
+  for(var i=0;i<LAYERS;i++){
+    drawRidge(i,env,t,parY);
+    drawMistBand(i,env,t,dt);
+  }
+  drawFlock(env);
+  /* vignette */
+  var vg=ctx.createRadialGradient(W/2,H/2,H*.3,W/2,H/2,H*.95);
+  vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.16)');
+  ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+}
 
-  document.addEventListener('visibilitychange', function(){
-    if (document.hidden){
-      running = false;
-      cancelAnimationFrame(rafId);
-    } else if (!running){
-      running = true;
-      rafId = requestAnimationFrame(frame);
-    }
-  });
+/* ---------- HUD ---------- */
+var hudT=0,cycNow=0;
+function hudTick(dt,env){
+  hudT-=dt;if(hudT>0)return;hudT=.2;
+  var fl=flock?flock.birds.length+' birds aloft':'flock in '+Math.max(0,nextFlock).toFixed(1)+'s';
+  hud.innerHTML=env.name+'<br>day cycle '+Math.round(cycNow*100)+'%<br>'+fl;
+}
+
+/* ---------- loop / lifecycle ---------- */
+var raf=null,t=0,last=performance.now();
+function frame(now){
+  var dt=Math.min(.05,(now-last)/1000);last=now;t+=dt;
+  mxS+=(mx-mxS)*.06;myS+=(my-myS)*.06;
+  var parY=(myS/H-.5);
+  cycNow=(t%CYC)/CYC;
+  var env=envAt(cycNow);
+  nextFlock-=dt;
+  if(nextFlock<=0){spawnFlock();nextFlock=12+Math.random()*13}
+  updateFlock(dt);
+  draw(env,t,dt,parY);
+  hudTick(dt,env);
+  raf=requestAnimationFrame(frame);
+}
+function resize(){
+  DPR=Math.min(devicePixelRatio||1,2);
+  W=innerWidth;H=innerHeight;
+  canvas.width=W*DPR;canvas.height=H*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  buildMist();
+}
+addEventListener('resize',resize);
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){if(raf)cancelAnimationFrame(raf);raf=null}
+  else{last=performance.now();if(!raf)raf=requestAnimationFrame(frame)}
+});
+resize();
+raf=requestAnimationFrame(frame);
 })();
 </script>
 </body>

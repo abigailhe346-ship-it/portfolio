@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Particle Galaxy — 3D—04</title>
+<title>Firefly Valley — Plein Air No.17</title>
 <style>
 .topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:difference;color:#fff;pointer-events:none}
 .topbar a{color:#fff;text-decoration:none;pointer-events:auto}
@@ -12,15 +12,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html{background:#000}
-body{height:400vh;background:#000;font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
-#c{position:fixed;inset:0;display:block;pointer-events:none}
+html{background:#070a18}
+body{height:400vh;background:#070a18;font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+#c{position:fixed;inset:0;display:block}
 .center-hint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;user-select:none;z-index:5}
 .center-hint h1{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:clamp(40px,6vw,84px);color:#f4f1ea;line-height:1}
 .center-hint p{margin-top:18px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:rgba(244,241,234,.45)}
+.endcap{opacity:0}
 .progress{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.26em;color:rgba(255,255,255,.5);pointer-events:none;user-select:none;z-index:5}
+.state{position:fixed;left:26px;bottom:64px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(168,197,160,.5);pointer-events:none;user-select:none;z-index:5}
+.soundbtn{position:fixed;left:26px;bottom:22px;z-index:100;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(244,241,234,.6);background:transparent;border:1px solid rgba(244,241,234,.25);border-radius:999px;padding:8px 16px;cursor:pointer;transition:color .25s ease,border-color .25s ease}
+.soundbtn:hover{color:#fff;border-color:rgba(255,255,255,.55)}
 .bar{position:fixed;left:0;bottom:0;height:2px;width:100%;background:rgba(255,255,255,.07);z-index:5;pointer-events:none}
-.bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#ffe9b8,#6b4dff)}
+.bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#d9a441,#a8c5a0)}
+.seal{position:fixed;right:22px;bottom:18px;z-index:100;display:flex;align-items:center;gap:9px;pointer-events:none;user-select:none;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(244,241,234,.55)}
+.seal svg{display:block;width:44px;height:29px}
+.grain{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.06;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");background-size:260px 260px}
+@media(max-width:680px){
+  .state{display:none}
+  .seal{bottom:64px}
+}
 </style>
 <script type="importmap">
 {
@@ -32,40 +43,88 @@ body{height:400vh;background:#000;font-family:'Space Grotesk',sans-serif;-webkit
 </script>
 </head>
 <body>
-<div class="topbar"><a href="../../index.html">← Index</a><span>3D—04 · Particle Galaxy</span></div>
+<div class="topbar"><a href="../../index.html">← Index</a><span>Plein Air — No.17</span></div>
 <canvas id="c"></canvas>
-<div class="center-hint" id="hint"><h1>Traverse</h1><p>scroll to travel</p></div>
+<div class="center-hint" id="hint"><h1>Firefly Valley</h1><p>scroll to enter · click to startle</p></div>
+<div class="center-hint endcap" id="endcap"><h1>The valley at rest</h1><p>scroll back to walk it again</p></div>
+<div class="state" id="state">swarm · waking</div>
+<button class="soundbtn" id="sndBtn">Sound · off</button>
 <div class="progress" id="pct">000%</div>
 <div class="bar"><i id="barFill"></i></div>
+<div class="seal">
+  <svg viewBox="0 0 52 34" aria-hidden="true"><path d="M7 21C13 9 25 6 32 10c6 3.4 3.6 9.6-2.4 10.6-4.8.8-8.4-2.4-6.6-6.8" fill="none" stroke="#c8442a" stroke-width="4.4" stroke-linecap="round" opacity=".9"/><path d="M11 27.5c9.5-4.4 23-5.2 34-1.8" fill="none" stroke="#c8442a" stroke-width="2.4" stroke-linecap="round" opacity=".45"/></svg>
+  <span>Plein Air — No.17</span>
+</div>
+<div class="grain"></div>
 <script type="module">
 import * as THREE from 'three';
 
 const canvas = document.getElementById('c');
 const DPR = Math.min(window.devicePixelRatio || 1, 2);
+const MOBILE = window.matchMedia('(pointer:coarse)').matches || window.innerWidth < 700;
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
 renderer.setPixelRatio(DPR);
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x000000, 1);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.05, 400);
+scene.fog = new THREE.FogExp2(0x131a33, 0.016);
+const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.05, 500);
 
-/* 100k-particle logarithmic spiral galaxy */
-const COUNT = 100000;
-const RADIUS = 22;
-const ARMS = 4;
-const SPIN = 0.24;
+/* twilight sky gradient */
+{
+  const bgc = document.createElement('canvas');
+  bgc.width = 2; bgc.height = 512;
+  const b = bgc.getContext('2d');
+  const g = b.createLinearGradient(0, 0, 0, 512);
+  g.addColorStop(0, '#070a18');
+  g.addColorStop(0.45, '#10152e');
+  g.addColorStop(0.72, '#1c2340');
+  g.addColorStop(0.9, '#2c3a66');
+  g.addColorStop(1, '#413b52');
+  b.fillStyle = g;
+  b.fillRect(0, 0, 2, 512);
+  const bgTex = new THREE.CanvasTexture(bgc);
+  bgTex.colorSpace = THREE.SRGBColorSpace;
+  scene.background = bgTex;
+}
 
-const positions = new Float32Array(COUNT * 3);
-const colors = new Float32Array(COUNT * 3);
-const sizes = new Float32Array(COUNT);
+/* dim moon for the terrain */
+const moonLight = new THREE.DirectionalLight(0x4a5a8a, 0.5);
+moonLight.position.set(30, 40, -60);
+scene.add(moonLight);
+scene.add(new THREE.AmbientLight(0x141c30, 0.7));
 
-const cIn = new THREE.Color(0xffedc0);
-const cMid = new THREE.Color(0xc7a6ff);
-const cOut = new THREE.Color(0x6b4dff);
-const tmp = new THREE.Color();
+function makeGlowSprite(inner, outer, size) {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 128;
+  const ctx = cv.getContext('2d');
+  const g = ctx.createRadialGradient(64, 64, 2, 64, 64, 63);
+  g.addColorStop(0, inner);
+  g.addColorStop(0.35, outer);
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  const spr = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: new THREE.CanvasTexture(cv), blending: THREE.AdditiveBlending,
+    depthWrite: false, fog: false, transparent: true
+  }));
+  spr.scale.setScalar(size);
+  return spr;
+}
+const moonGlow = makeGlowSprite('rgba(232,228,216,0.8)', 'rgba(150,165,210,0.22)', 26);
+moonGlow.position.set(58, 44, -150);
+scene.add(moonGlow);
 
+/* ---------- the valley ---------- */
+function pathX(z) { return Math.sin(z * 0.045) * 6 + Math.sin(z * 0.013) * 10; }
+function floorY(z) { return Math.sin(z * 0.02) * 1.2; }
+function groundY(x, z) {
+  const d = Math.abs(x - pathX(z));
+  return floorY(z) + Math.pow(d, 1.6) * 0.055 + Math.sin(x * 0.5) * Math.sin(z * 0.31) * 0.35;
+}
 function gauss() {
   let u = 0, v = 0;
   while (u === 0) u = Math.random();
@@ -73,70 +132,298 @@ function gauss() {
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 }
 
-for (let i = 0; i < COUNT; i++) {
-  const r = Math.pow(Math.random(), 1.65) * RADIUS;
-  const branch = (i % ARMS) / ARMS * Math.PI * 2;
-  const spinA = r * SPIN;
-  const spread = (0.32 + r * 0.055) * (0.55 + Math.pow(Math.random(), 2.5) * 1.5);
-  const gx = gauss() * spread;
-  const gy = gauss() * spread * 0.38;
-  const gz = gauss() * spread;
-  positions[i * 3] = Math.cos(branch + spinA) * r + gx;
-  positions[i * 3 + 1] = gy;
-  positions[i * 3 + 2] = Math.sin(branch + spinA) * r + gz;
-
-  const t = Math.pow(r / RADIUS, 1.15);
-  if (t < 0.42) tmp.lerpColors(cIn, cMid, t / 0.42);
-  else tmp.lerpColors(cMid, cOut, (t - 0.42) / 0.58);
-  const jitter = 0.88 + Math.random() * 0.24;
-  colors[i * 3] = tmp.r * jitter;
-  colors[i * 3 + 1] = tmp.g * jitter;
-  colors[i * 3 + 2] = tmp.b * jitter;
-
-  sizes[i] = 0.05 + Math.pow(Math.random(), 3.2) * 0.24;
+/* terrain */
+{
+  const g = new THREE.PlaneGeometry(150, 200, MOBILE ? 50 : 76, MOBILE ? 66 : 100);
+  const pos = g.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const z = -pos.getY(i) - 50; // local +y → world -z after the flat rotation, mesh at z=-50
+    pos.setZ(i, groundY(x, z));
+  }
+  g.computeVertexNormals();
+  const terrain = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: 0x12271c, roughness: 1, metalness: 0 }));
+  terrain.rotation.x = -Math.PI / 2;
+  terrain.position.z = -50;
+  scene.add(terrain);
 }
 
-const geo = new THREE.BufferGeometry();
-geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-geo.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
-geo.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
-
-const galaxyMat = new THREE.ShaderMaterial({
-  uniforms: { uScale: { value: 1 } },
-  vertexShader: `
-    attribute vec3 aColor;
-    attribute float aSize;
-    uniform float uScale;
-    varying vec3 vColor;
-    void main() {
-      vColor = aColor;
-      vec4 mv = modelViewMatrix * vec4(position, 1.0);
-      float ps = aSize * uScale / max(0.1, -mv.z);
-      gl_PointSize = min(ps, 30.0);
-      gl_Position = projectionMatrix * mv;
+/* the stream along the valley floor */
+{
+  const pts = [];
+  const idx = [];
+  let vi = 0;
+  for (let z = 30; z >= -135; z -= 1.5) {
+    const cx = pathX(z);
+    const w = 0.55 + Math.sin(z * 0.4) * 0.12;
+    pts.push(cx - w, floorY(z) + 0.05, z, cx + w, floorY(z) + 0.05, z);
+    if (vi >= 2) {
+      idx.push(vi - 2, vi - 1, vi, vi - 1, vi + 1, vi);
     }
-  `,
-  fragmentShader: `
-    varying vec3 vColor;
-    void main() {
-      float d = distance(gl_PointCoord, vec2(0.5));
-      float a = pow(smoothstep(0.5, 0.0, d), 2.1);
-      gl_FragColor = vec4(vColor, a);
+    vi += 2;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pts), 3));
+  g.setIndex(idx);
+  const stream = new THREE.Mesh(g, new THREE.MeshBasicMaterial({
+    color: 0x4a7086, transparent: true, opacity: 0.5, side: THREE.DoubleSide
+  }));
+  scene.add(stream);
+}
+
+/* ---------- shared point-sprite shaders ---------- */
+const FRAG = `
+  varying vec3 vColor;
+  varying float vAlpha;
+  void main() {
+    float d = distance(gl_PointCoord, vec2(0.5));
+    float a = pow(smoothstep(0.5, 0.0, d), 2.1) * vAlpha;
+    gl_FragColor = vec4(vColor, a);
+  }
+`;
+
+/* far layer — cold stars, barely breathing */
+const STAR_N = MOBILE ? 6000 : 20000;
+const starUniforms = { uTime: { value: 0 }, uScale: { value: 1 } };
+{
+  const pos = new Float32Array(STAR_N * 3);
+  const col = new Float32Array(STAR_N * 3);
+  const phase = new Float32Array(STAR_N);
+  const size = new Float32Array(STAR_N);
+  const cA = new THREE.Color(0xdfe6f2), cB = new THREE.Color(0xb8c8e8), tmp = new THREE.Color();
+  for (let i = 0; i < STAR_N; i++) {
+    const az = Math.random() * Math.PI * 2;
+    const el = Math.asin(Math.random() * 0.92 + 0.06);
+    const r = 160 + Math.random() * 50;
+    pos[i * 3] = Math.cos(az) * Math.cos(el) * r;
+    pos[i * 3 + 1] = Math.sin(el) * r * 0.6 + 10;
+    pos[i * 3 + 2] = Math.sin(az) * Math.cos(el) * r - 45;
+    tmp.lerpColors(cA, cB, Math.random()).multiplyScalar(0.6 + Math.random() * 0.4);
+    col[i * 3] = tmp.r; col[i * 3 + 1] = tmp.g; col[i * 3 + 2] = tmp.b;
+    phase[i] = Math.random() * Math.PI * 2;
+    size[i] = 0.1 + Math.pow(Math.random(), 2.5) * 0.16;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('aColor', new THREE.BufferAttribute(col, 3));
+  g.setAttribute('aPhase', new THREE.BufferAttribute(phase, 1));
+  g.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
+  const m = new THREE.ShaderMaterial({
+    uniforms: starUniforms,
+    vertexShader: `
+      attribute vec3 aColor;
+      attribute float aPhase;
+      attribute float aSize;
+      uniform float uTime;
+      uniform float uScale;
+      varying vec3 vColor;
+      varying float vAlpha;
+      void main() {
+        float tw = 0.55 + 0.45 * sin(uTime * 0.8 + aPhase);
+        vColor = aColor;
+        vAlpha = 0.5 * tw;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = min(aSize * uScale / max(0.1, -mv.z), 5.0);
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: FRAG,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+  });
+  const stars = new THREE.Points(g, m);
+  stars.frustumCulled = false;
+  stars.renderOrder = 1;
+  scene.add(stars);
+}
+
+/* near layer — dark grass clump silhouettes drifting in the wind */
+const GRASS_N = MOBILE ? 6000 : 22000;
+const grassUniforms = { uTime: { value: 0 }, uScale: { value: 1 }, uWind: { value: 0 } };
+{
+  const pos = new Float32Array(GRASS_N * 3);
+  const col = new Float32Array(GRASS_N * 3);
+  const phase = new Float32Array(GRASS_N);
+  const size = new Float32Array(GRASS_N);
+  const cA = new THREE.Color(0x0d1f14), cB = new THREE.Color(0x1c3a24), tmp = new THREE.Color();
+  let i = 0;
+  const CLUMPS = MOBILE ? 110 : 240;
+  for (let c = 0; c < CLUMPS && i < GRASS_N; c++) {
+    const cz = 30 - Math.random() * 78;
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const cx = pathX(cz) + side * (2 + Math.pow(Math.random(), 1.6) * 14);
+    const per = 40 + Math.floor(Math.random() * 60);
+    for (let k = 0; k < per && i < GRASS_N; k++, i++) {
+      const x = cx + gauss() * 0.8;
+      const z = cz + gauss() * 0.8;
+      pos[i * 3] = x;
+      pos[i * 3 + 1] = groundY(x, z) + Math.pow(Math.random(), 2) * 0.7;
+      pos[i * 3 + 2] = z;
+      tmp.lerpColors(cA, cB, Math.random()).multiplyScalar(0.8 + Math.random() * 0.4);
+      col[i * 3] = tmp.r; col[i * 3 + 1] = tmp.g; col[i * 3 + 2] = tmp.b;
+      phase[i] = Math.random() * Math.PI * 2;
+      size[i] = 0.08 + Math.pow(Math.random(), 2) * 0.22;
     }
-  `,
-  transparent: true,
-  depthWrite: false,
-  blending: THREE.AdditiveBlending
-});
+  }
+  // fill any remainder far away
+  for (; i < GRASS_N; i++) {
+    const z = -40 - Math.random() * 90;
+    const x = pathX(z) + (Math.random() < 0.5 ? -1 : 1) * (4 + Math.random() * 24);
+    pos[i * 3] = x;
+    pos[i * 3 + 1] = groundY(x, z) + Math.pow(Math.random(), 2) * 0.8;
+    pos[i * 3 + 2] = z;
+    tmp.lerpColors(cA, cB, Math.random());
+    col[i * 3] = tmp.r; col[i * 3 + 1] = tmp.g; col[i * 3 + 2] = tmp.b;
+    phase[i] = Math.random() * Math.PI * 2;
+    size[i] = 0.1 + Math.random() * 0.2;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('aColor', new THREE.BufferAttribute(col, 3));
+  g.setAttribute('aPhase', new THREE.BufferAttribute(phase, 1));
+  g.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
+  const m = new THREE.ShaderMaterial({
+    uniforms: grassUniforms,
+    vertexShader: `
+      attribute vec3 aColor;
+      attribute float aPhase;
+      attribute float aSize;
+      uniform float uTime;
+      uniform float uScale;
+      uniform float uWind;
+      varying vec3 vColor;
+      varying float vAlpha;
+      void main() {
+        vec3 p = position;
+        p.x += sin(uTime * 1.1 + aPhase) * 0.1 * (0.4 + uWind);
+        vColor = aColor;
+        vAlpha = 0.92;
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        gl_PointSize = min(aSize * uScale / max(0.1, -mv.z), 42.0);
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: FRAG,
+    transparent: true, depthWrite: false, blending: THREE.NormalBlending
+  });
+  const grass = new THREE.Points(g, m);
+  grass.frustumCulled = false;
+  grass.renderOrder = 2;
+  scene.add(grass);
+}
 
-const galaxy = new THREE.Points(geo, galaxyMat);
-galaxy.rotation.z = 0.1;
-scene.add(galaxy);
+/* mid layer — tens of thousands of fireflies over the valley floor */
+const CLUSTERS = [10, -18, -46]; // dense swarms the camera passes through
+const FF_N = MOBILE ? 22000 : 58000;
+const ffUniforms = {
+  uTime: { value: 0 },
+  uScale: { value: 1 },
+  uWind: { value: 0 },
+  uActivity: { value: 0.8 },
+  uCamPos: { value: new THREE.Vector3() },
+  uPulse: { value: new THREE.Vector4(0, 0, 0, -100) }
+};
+{
+  const pos = new Float32Array(FF_N * 3);
+  const col = new Float32Array(FF_N * 3);
+  const rand = new Float32Array(FF_N * 3);
+  const phase = new Float32Array(FF_N);
+  const spd = new Float32Array(FF_N);
+  const size = new Float32Array(FF_N);
+  const cGold = new THREE.Color(0xffd9a0), cAmber = new THREE.Color(0xe8b34a), cPale = new THREE.Color(0xcfe4b8), tmp = new THREE.Color();
+  for (let i = 0; i < FF_N; i++) {
+    let z;
+    if (Math.random() < 0.35) {
+      z = CLUSTERS[Math.floor(Math.random() * CLUSTERS.length)] + gauss() * 5.5;
+    } else {
+      z = 30 - Math.random() * 160;
+    }
+    const x = pathX(z) + gauss() * (3 + Math.pow(Math.random(), 1.5) * 9);
+    pos[i * 3] = x;
+    pos[i * 3 + 1] = groundY(x, z) + 0.25 + Math.pow(Math.random(), 2.2) * 2.6;
+    pos[i * 3 + 2] = z;
+    const rPick = Math.random();
+    if (rPick < 0.7) tmp.copy(cGold);
+    else if (rPick < 0.9) tmp.copy(cAmber);
+    else tmp.copy(cPale);
+    tmp.multiplyScalar(0.85 + Math.random() * 0.3);
+    col[i * 3] = tmp.r; col[i * 3 + 1] = tmp.g; col[i * 3 + 2] = tmp.b;
+    rand[i * 3] = Math.random() * 2 - 1;
+    rand[i * 3 + 1] = Math.random() * 2 - 1;
+    rand[i * 3 + 2] = Math.random() * 2 - 1;
+    phase[i] = Math.random() * Math.PI * 2;
+    spd[i] = 0.6 + Math.random() * 1.7;
+    size[i] = 0.05 + Math.pow(Math.random(), 2.4) * 0.11;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('aColor', new THREE.BufferAttribute(col, 3));
+  g.setAttribute('aRand', new THREE.BufferAttribute(rand, 3));
+  g.setAttribute('aPhase', new THREE.BufferAttribute(phase, 1));
+  g.setAttribute('aSpd', new THREE.BufferAttribute(spd, 1));
+  g.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
+  const m = new THREE.ShaderMaterial({
+    uniforms: ffUniforms,
+    vertexShader: `
+      attribute vec3 aColor;
+      attribute vec3 aRand;
+      attribute float aPhase;
+      attribute float aSpd;
+      attribute float aSize;
+      uniform float uTime;
+      uniform float uScale;
+      uniform float uWind;
+      uniform float uActivity;
+      uniform vec3 uCamPos;
+      uniform vec4 uPulse;
+      varying vec3 vColor;
+      varying float vAlpha;
+      void main() {
+        vec3 p = position;
+        // gentle wander
+        p += vec3(
+          sin(uTime * 0.7 + aPhase),
+          sin(uTime * 0.9 + aPhase * 1.7),
+          cos(uTime * 0.6 + aPhase * 1.3)
+        ) * 0.35;
+        // leeward drift
+        p.x += uWind * (0.4 + 0.6 * sin(aPhase * 3.1));
+        // startled by the passing camera
+        vec3 dc = p - uCamPos + vec3(0.001);
+        float d = length(dc);
+        float scare = smoothstep(6.0, 0.5, d);
+        p += normalize(dc + aRand * 0.6 + vec3(0.0, 0.35, 0.0)) * scare * scare * 2.6;
+        // startled by a click pulse
+        float age = uTime - uPulse.w;
+        if (age > 0.0 && age < 3.0) {
+          vec3 dp = p - uPulse.xyz + vec3(0.001);
+          float dd = length(dp);
+          float w = exp(-dd * 0.3) * exp(-age * 1.5) * smoothstep(0.0, 0.08, age);
+          p += normalize(dp + aRand * 0.4) * w * 5.0 * (0.5 + abs(aRand.x));
+        }
+        // flicker — each fly keeps its own phase
+        float fl = 0.3 + 0.7 * pow(0.5 + 0.5 * sin(uTime * aSpd * 3.0 + aPhase * 7.0), 3.0);
+        vColor = aColor * fl;
+        vAlpha = uActivity * (0.55 + 0.45 * fl);
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        gl_PointSize = min(aSize * (0.8 + 0.4 * fl) * uScale / max(0.1, -mv.z), 24.0);
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: FRAG,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+  });
+  const fireflies = new THREE.Points(g, m);
+  fireflies.frustumCulled = false;
+  fireflies.renderOrder = 3;
+  scene.add(fireflies);
+}
 
-/* scroll-driven camera */
+/* ---------- scroll journey ---------- */
 const pctEl = document.getElementById('pct');
 const barFill = document.getElementById('barFill');
 const hintEl = document.getElementById('hint');
+const endEl = document.getElementById('endcap');
+const stateEl = document.getElementById('state');
 let target = 0;
 let prog = 0;
 
@@ -147,35 +434,170 @@ function readScroll() {
 window.addEventListener('scroll', readScroll, { passive: true });
 readScroll();
 
-function updateUScale() {
-  galaxyMat.uniforms.uScale.value = (window.innerHeight * DPR) / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) * 0.5));
+/* pointer parallax + startle pulse */
+let mx = 0, my = 0, smx = 0, smy = 0;
+window.addEventListener('pointermove', e => {
+  mx = (e.clientX / window.innerWidth) * 2 - 1;
+  my = (e.clientY / window.innerHeight) * 2 - 1;
+}, { passive: true });
+
+const ray = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+const pulsePlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -1.5);
+const pulseP = new THREE.Vector3();
+let simT = 0;
+canvas.addEventListener('pointerdown', e => {
+  ndc.set((e.clientX / window.innerWidth) * 2 - 1, -((e.clientY / window.innerHeight) * 2 - 1));
+  ray.setFromCamera(ndc, camera);
+  let p = ray.ray.intersectPlane(pulsePlane, pulseP);
+  if (!p) p = ray.ray.at(16, pulseP);
+  ffUniforms.uPulse.value.set(p.x, p.y, p.z, simT);
+});
+
+/* procedural night audio — crickets + valley air (off by default) */
+let AC = null, soundOn = false;
+const sndBtn = document.getElementById('sndBtn');
+function buildAudio() {
+  const len = 2 * AC.sampleRate;
+  const buf = AC.createBuffer(1, len, AC.sampleRate);
+  const d = buf.getChannelData(0);
+  let l = 0;
+  for (let i = 0; i < len; i++) {
+    const w = Math.random() * 2 - 1;
+    l = (l + 0.03 * w) / 1.03;
+    d[i] = l * 1.8;
+  }
+  const src = AC.createBufferSource();
+  src.buffer = buf; src.loop = true;
+  const f = AC.createBiquadFilter();
+  f.type = 'lowpass'; f.frequency.value = 480;
+  const g = AC.createGain(); g.gain.value = 0.03;
+  src.connect(f); f.connect(g); g.connect(AC.destination);
+  src.start();
+  for (let k = 0; k < 3; k++) setTimeout(chirp, k * 500 + Math.random() * 800);
 }
-updateUScale();
+function chirp() {
+  if (!soundOn || !AC) return;
+  const o = AC.createOscillator();
+  o.type = 'sine';
+  o.frequency.value = 4000 + Math.random() * 600;
+  const g = AC.createGain();
+  g.gain.value = 0;
+  const t0 = AC.currentTime;
+  const n = 3 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < n; i++) {
+    const ts = t0 + i * 0.07;
+    g.gain.setValueAtTime(0, ts);
+    g.gain.linearRampToValueAtTime(0.03, ts + 0.015);
+    g.gain.linearRampToValueAtTime(0, ts + 0.05);
+  }
+  o.connect(g); g.connect(AC.destination);
+  o.start(t0); o.stop(t0 + n * 0.07 + 0.1);
+  setTimeout(chirp, 300 + Math.random() * 1400);
+}
+sndBtn.addEventListener('click', () => {
+  soundOn = !soundOn;
+  sndBtn.textContent = soundOn ? 'Sound · on' : 'Sound · off';
+  if (soundOn && !AC) {
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    buildAudio();
+  }
+  if (AC) { if (soundOn) AC.resume(); else AC.suspend(); }
+});
+
+/* world state — swarm activity & gusts keep running even at scroll-rest */
+let windTarget = 0, windVal = 0, windTimer = 4;
+let stateTimer = 0;
+let windStr = '', actStr = '';
+
+function updateUScale() {
+  const s = (window.innerHeight * DPR) / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) * 0.5));
+  starUniforms.uScale.value = s;
+  grassUniforms.uScale.value = s;
+  ffUniforms.uScale.value = s;
+}
 
 /* loop */
 let rafId = null;
 let last = performance.now();
+const lookV = new THREE.Vector3();
+const lookA = new THREE.Vector3();
+const lookB = new THREE.Vector3();
 
 function tick(dt, t) {
-  prog += (target - prog) * (1 - Math.pow(0.0001, dt)); // critically smooth
+  simT = t;
+  prog += (target - prog) * (1 - Math.pow(0.0001, dt));
   const s = prog * prog * (3 - 2 * prog);
 
-  const camZ = 36 - 72 * s;
-  const camY = 17 - Math.sin(s * Math.PI) * 15.6;
-  const camX = Math.sin(s * Math.PI * 2) * 1.6;
-  const bump = Math.exp(-Math.pow((s - 0.5) * 4.2, 2));
-  camera.fov = 58 + 38 * bump;
+  /* gust scheduler */
+  windTimer -= dt;
+  if (windTimer <= 0) {
+    windTarget = windTarget < 0.4 ? 0.5 + Math.random() * 0.8 : Math.random() * 0.15;
+    windTimer = windTarget > 0.4 ? 2 + Math.random() * 2.5 : 4 + Math.random() * 5;
+  }
+  windVal += (windTarget - windVal) * Math.min(1, dt * 1.2);
+
+  /* swarm activity — a slow breath over ~2 minutes */
+  const act = 0.62 + 0.38 * (0.5 + 0.5 * Math.sin(t * 0.045 + 1.7));
+
+  smx += (mx - smx) * 0.05;
+  smy += (my - smy) * 0.05;
+
+  /* camera: follow the stream low, then climb above the valley */
+  let camX, camY, camZ;
+  if (s < 0.72) {
+    const u = s / 0.72;
+    camZ = 26 - 101 * u;
+    camX = pathX(camZ) + Math.sin(t * 0.3) * 0.3 + smx * 1.4;
+    camY = floorY(camZ) + 2.1 + Math.sin(t * 0.5) * 0.15 - smy * 0.6;
+    lookV.set(pathX(camZ - 12), floorY(camZ - 12) + 1.6, camZ - 12);
+  } else {
+    const u = (s - 0.72) / 0.28;
+    const e = u * u * (3 - 2 * u);
+    camZ = -75 - 20 * e;
+    camX = pathX(-75) + 16 * e + smx * 2.2;
+    camY = floorY(-75) + 2.1 + 24 * e;
+    lookA.set(pathX(-87), floorY(-87) + 1.6, -87);
+    lookB.set(pathX(-55), 0.5, -55);
+    lookV.lerpVectors(lookA, lookB, e);
+  }
+
+  /* FOV stretches while threading the swarms */
+  let bump = 0;
+  for (const cz of CLUSTERS) bump += Math.exp(-Math.pow((camZ - cz) / 7, 2));
+  bump *= s < 0.72 ? 1 : Math.max(0, 1 - (s - 0.72) / 0.08);
+  camera.fov = 58 + 24 * Math.min(1.2, bump);
   camera.updateProjectionMatrix();
-  updateUScale();
   camera.position.set(camX, camY, camZ);
-  camera.lookAt(0, 0, 0);
+  camera.lookAt(lookV);
+  updateUScale();
 
-  galaxy.rotation.y = t * 0.045;
+  /* feed the world */
+  starUniforms.uTime.value = t;
+  grassUniforms.uTime.value = t;
+  grassUniforms.uWind.value = windVal;
+  ffUniforms.uTime.value = t;
+  ffUniforms.uWind.value = windVal * 1.3;
+  ffUniforms.uActivity.value = act;
+  ffUniforms.uCamPos.value.copy(camera.position);
 
+  /* readouts */
   const pct = Math.round(prog * 100);
   pctEl.textContent = String(pct).padStart(3, '0') + '%';
   barFill.style.width = (prog * 100).toFixed(1) + '%';
   hintEl.style.opacity = Math.max(0, 1 - prog * 14).toFixed(3);
+  const endO = Math.min(1, Math.max(0, (prog - 0.9) / 0.08));
+  endEl.style.opacity = endO.toFixed(3);
+  stateTimer -= dt;
+  if (stateTimer <= 0) {
+    stateTimer = 0.5;
+    const ws = windVal > 0.5 ? 'gust' : windVal > 0.2 ? 'breeze' : 'calm';
+    const as = act > 0.85 ? 'ablaze' : act > 0.6 ? 'astir' : 'drowsy';
+    if (ws !== windStr || as !== actStr) {
+      windStr = ws; actStr = as;
+      stateEl.textContent = `swarm · ${as} · wind ${ws}`;
+    }
+  }
 
   renderer.render(scene, camera);
 }

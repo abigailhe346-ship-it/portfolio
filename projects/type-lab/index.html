@@ -3,19 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WEB—03 · Type Lab</title>
+<title>Plein Air Nº08 — Brush Type</title>
 <style>
 .topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:difference;color:#fff;pointer-events:none}
 .topbar a{color:#fff;text-decoration:none;pointer-events:auto}
 .topbar a:hover{text-decoration:underline}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<div class="topbar"><a href="../../index.html">← Index</a><span>WEB—03 · Type Lab</span></div>
 <style>
 :root{
-  --bg:#f4f1ea;
-  --ink:#141312;
-  --line:rgba(20,19,18,.15);
+  --bg:#f2ede0;
+  --ink:#2a2e28;
+  --gold:#d9a441;
+  --verm:#c8442a;
+  --line:rgba(42,46,40,.15);
   --mono:'JetBrains Mono',monospace;
   --serif:'Instrument Serif',serif;
 }
@@ -23,7 +24,20 @@
 body{background:var(--bg);color:var(--ink);font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;-webkit-font-smoothing:antialiased}
 ::selection{background:var(--ink);color:var(--bg)}
 
-.layout{display:grid;grid-template-columns:1fr 260px;height:100vh;padding-top:56px}
+.layout{display:grid;grid-template-columns:1fr 280px;height:100vh;padding-top:52px}
+
+/* ---------- grain + seal + sound ---------- */
+.grain{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:400;opacity:.05;mix-blend-mode:multiply}
+.seal{position:fixed;right:22px;bottom:16px;z-index:120;display:flex;flex-direction:column;align-items:flex-end;gap:1px;pointer-events:none}
+.seal svg{filter:drop-shadow(0 1px 1px rgba(42,46,40,.28))}
+.seal span{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--verm);opacity:.9}
+#snd{
+  position:fixed;left:22px;bottom:18px;z-index:120;
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  background:none;border:1px solid var(--line);color:var(--ink);padding:8px 12px;cursor:pointer;opacity:.7;
+  transition:opacity .3s,border-color .3s;
+}
+#snd:hover{opacity:1;border-color:var(--ink)}
 
 /* ---------- stage ---------- */
 .stage{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;border-right:1px solid var(--line)}
@@ -32,29 +46,41 @@ body{background:var(--bg);color:var(--ink);font-family:'Space Grotesk',sans-seri
   background:
     linear-gradient(var(--line) 1px,transparent 1px) 0 0/100% 25%,
     linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/25% 100%;
-  opacity:.35;
+  opacity:.3;
 }
+#ink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
 #specimen{
-  position:relative;white-space:nowrap;outline:none;cursor:text;
+  position:relative;white-space:nowrap;outline:none;cursor:text;z-index:2;
   font-family:var(--serif);
-  caret-color:var(--ink);
+  caret-color:var(--verm);
   line-height:1;
 }
-#specimen .ch{display:inline-block;will-change:transform;transform-origin:50% 60%}
+#specimen .ch{display:inline-block;position:relative;will-change:transform;transform-origin:50% 60%}
 #specimen .sp{display:inline-block}
+#specimen .bloom{
+  position:absolute;left:50%;top:54%;z-index:-1;pointer-events:none;
+  transform:translate(-50%,-50%) scale(1);
+  opacity:var(--bop,.85);
+}
+#specimen .bloom.wet-in{animation:bloomIn ease-out both}
+@keyframes bloomIn{
+  from{opacity:0;transform:translate(-50%,-50%) scale(.8)}
+  to{opacity:var(--bop,.85);transform:translate(-50%,-50%) scale(1)}
+}
 .hint{
   position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
   font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.45;white-space:nowrap;
 }
 .readout{
-  position:absolute;top:20px;left:24px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.55;line-height:1.9;
+  position:absolute;top:20px;left:24px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.6;line-height:1.9;pointer-events:none;
 }
 
 /* ---------- control panel ---------- */
-.panel{display:flex;flex-direction:column;padding:28px 24px 0;gap:30px;overflow-y:auto}
+.panel{display:flex;flex-direction:column;padding:28px 24px 0;gap:26px;overflow-y:auto}
 .panel h1{font-family:var(--mono);font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
 .ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
 .ctl label b{font-weight:400;opacity:.55}
+.ctl.wet label{color:#8a6a1f}
 input[type=range]{
   -webkit-appearance:none;appearance:none;width:100%;height:18px;background:transparent;cursor:pointer;
 }
@@ -64,6 +90,7 @@ input[type=range]::-webkit-slider-thumb{
   transition:transform .2s cubic-bezier(.34,1.56,.64,1);
 }
 input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.35)}
+.ctl.wet input[type=range]::-webkit-slider-thumb{background:var(--gold);border-color:#8a6a1f}
 input[type=range]::-moz-range-track{height:1px;background:var(--ink)}
 input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--bg);border:1.5px solid var(--ink)}
 
@@ -76,7 +103,8 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
   transition:background .3s,color .3s,border-color .3s;
 }
 .mode:hover{border-color:var(--ink)}
-.mode.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.mode.on{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+.mode[data-mode="scatter"].on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 
 @media (max-width:760px){
   body{overflow:auto;height:auto}
@@ -91,19 +119,23 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
 </head>
 <body>
 
+<div class="topbar"><a href="../../index.html">← Index</a><span>Plein Air — No.08</span></div>
+
 <div class="layout">
-  <main class="stage">
+  <main class="stage" id="stage">
+    <canvas id="ink"></canvas>
     <div class="readout" id="readout"></div>
-    <div id="specimen" contenteditable="true" spellcheck="false" aria-label="Editable specimen">Typographia</div>
-    <div class="hint">Click the word to edit — Weight / Tracking / Slant / Size on the right</div>
+    <div id="specimen" contenteditable="true" spellcheck="false" aria-label="Editable specimen">Aquarelle</div>
+    <div class="hint">Click the word to edit — the ink is wet; Scatter splashes</div>
   </main>
 
   <aside class="panel">
-    <h1>Type Lab — Controls</h1>
+    <h1>Brush Type — Controls</h1>
     <div class="ctl"><label>Weight <b id="v-w">400</b></label><input type="range" id="s-w" min="300" max="600" value="400" step="1"></div>
     <div class="ctl"><label>Tracking <b id="v-t">0.00em</b></label><input type="range" id="s-t" min="-40" max="200" value="0" step="1"></div>
     <div class="ctl"><label>Slant <b id="v-s">0°</b></label><input type="range" id="s-s" min="0" max="14" value="0" step="1"></div>
-    <div class="ctl"><label>Size <b id="v-z">14vw</b></label><input type="range" id="s-z" min="4" max="22" value="14" step="1"></div>
+    <div class="ctl"><label>Size <b id="v-z">13vw</b></label><input type="range" id="s-z" min="4" max="20" value="13" step="1"></div>
+    <div class="ctl wet"><label>Wet 湿度 <b id="v-wet">55%</b></label><input type="range" id="s-wet" min="0" max="100" value="55" step="1"></div>
     <div class="modes">
       <span>Motion Mode</span>
       <button class="mode" data-mode="wave">Wave</button>
@@ -113,61 +145,188 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
   </aside>
 </div>
 
+<!-- grain -->
+<svg class="grain" aria-hidden="true"><filter id="grF"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#grF)"/></svg>
+
+<!-- seal -->
+<div class="seal" aria-hidden="true">
+  <svg viewBox="0 0 72 44" width="72" height="44">
+    <path d="M8 30 C16 20 30 13 44 15 C53 16 58 20 55 25 C52 30 40 32 29 30 C20 29 13 31 9 35" fill="none" stroke="#c8442a" stroke-width="5" stroke-linecap="round" opacity=".85"/>
+    <path d="M46 8 C53 14 59 24 62 36" fill="none" stroke="#c8442a" stroke-width="3.6" stroke-linecap="round" opacity=".6"/>
+    <path d="M14 34 C24 36 38 36 50 33" fill="none" stroke="#c8442a" stroke-width="2.2" stroke-linecap="round" opacity=".45"/>
+  </svg>
+  <span>Plein Air — No.08</span>
+</div>
+
+<button id="snd" aria-pressed="false">Sound — Off</button>
+
 <script>
 (function(){
   'use strict';
 
   var spec = document.getElementById('specimen');
   var readout = document.getElementById('readout');
+  var stage = document.getElementById('stage');
+  var MOBILE = window.matchMedia('(max-width:760px)').matches || ('ontouchstart' in window);
+
+  function rand(a,b){ return a + Math.random()*(b-a); }
+  function vhash(x,y){ var n=Math.sin(x*127.1+y*311.7)*43758.5453; return n-Math.floor(n); }
+  function vnoise(x,y){
+    var xi=Math.floor(x), yi=Math.floor(y), xf=x-xi, yf=y-yi;
+    var u=xf*xf*(3-2*xf), v=yf*yf*(3-2*yf);
+    return vhash(xi,yi)*(1-u)*(1-v)+vhash(xi+1,yi)*u*(1-v)+vhash(xi,yi+1)*(1-u)*v+vhash(xi+1,yi+1)*u*v;
+  }
 
   /* ---------- state ---------- */
-  var state = { weight: 400, tracking: 0, slant: 0, size: 14 };
-  var mode = null; // 'wave' | 'orbit' | 'scatter' | null
-  var mouse = { x: innerWidth / 2, y: innerHeight / 2 };
-  var chars = []; // {el, x,y,vx,vy, tx,ty, phase, scattered}
+  var state = { weight:400, tracking:0, slant:0, size:13, wet:55 };
+  var mode = null;
+  var mouse = { x: innerWidth/2, y: innerHeight/2 };
+  var chars = [];
+
+  /* ---------- world state : humidity + gusts ---------- */
+  var humidity = 0.6;
+  var wind = { value:0.03, target:0.03, label:'calm' };
+  function scheduleGust(){
+    setTimeout(function(){
+      wind.label='rising'; wind.target=0.3;
+      setTimeout(function(){
+        wind.label='gust'; wind.target=rand(0.7,1);
+        // a gust nudges loose scattered letters
+        if(mode==='scatter') chars.forEach(function(c){ if(!c.space) c.vx += wind.target*rand(2,7); });
+        setTimeout(function(){ wind.label='calm'; wind.target=0.03; scheduleGust(); }, rand(1400,2600));
+      }, 1300);
+    }, rand(8000,17000));
+  }
+  scheduleGust();
+
+  /* ---------- ink colors: 70 ink / 20 haystack gold / 10 vermilion ---------- */
+  var INKS = [ [42,46,40], [217,164,65], [200,68,42] ];
+  function inkPick(){
+    var r = Math.random();
+    var c = r<0.7 ? INKS[0] : (r<0.9 ? INKS[1] : INKS[2]);
+    var j = (Math.random()-0.5)*10; // light jitter
+    return [ c[0], Math.min(255,Math.max(0,c[1]+j)), Math.min(255,Math.max(0,c[2]+j)) ];
+  }
+
+  /* ---------- watercolor bloom per letter ---------- */
+  var bloomCtx = document.createElement('canvas').getContext('2d');
+  function fontStr(px){
+    return (state.slant>0?'italic ':'') + state.weight + ' ' + px + 'px "Instrument Serif", serif';
+  }
+  function makeBloom(ch, px){
+    var wet = state.wet/100;
+    var pad = px*(0.3 + wet*0.55);
+    bloomCtx.font = fontStr(px);
+    var w = Math.max(8, bloomCtx.measureText(ch).width);
+    var h = px*1.25;
+    var cw = Math.ceil(w + pad*2), chh = Math.ceil(h + pad*2);
+    var cv = document.createElement('canvas');
+    cv.width = cw; cv.height = chh;
+    var c = cv.getContext('2d');
+    c.font = fontStr(px);
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    var cx = cw/2, cy = chh/2 + px*0.04;
+    var layers = 3 + Math.round(wet*11);
+    for(var i=0;i<layers;i++){
+      var t = layers===1 ? 0 : i/(layers-1);
+      var sc = 1 + t*(0.05 + wet*0.6);
+      var col = inkPick();
+      var alpha = (0.05 + wet*0.075) * (1 - t*0.5);
+      // slight per-layer wobble, like water creeping unevenly
+      var ox = (vnoise(i*3.1, px)-0.5)*px*0.03*wet;
+      var oy = (vnoise(i*7.7, px)-0.5)*px*0.03*wet;
+      c.save();
+      c.translate(cx+ox, cy+oy);
+      c.scale(sc, sc*(1+t*wet*0.12));
+      c.fillStyle = 'rgba('+col[0]+','+col[1]+','+col[2]+','+alpha.toFixed(3)+')';
+      c.fillText(ch, 0, 0);
+      c.restore();
+    }
+    // edge darkening: a darker pooling ring right at the glyph boundary
+    if(state.wet > 8){
+      c.save();
+      c.translate(cx, cy);
+      c.scale(1.015, 1.015);
+      c.strokeStyle = 'rgba(30,33,29,' + (0.10 + wet*0.22).toFixed(3) + ')';
+      c.lineWidth = Math.max(0.8, px*0.012);
+      c.strokeText(ch, 0, 0);
+      c.restore();
+    }
+    return cv;
+  }
+
+  var bloomTimer = null;
+  function scheduleBloom(){
+    clearTimeout(bloomTimer);
+    bloomTimer = setTimeout(rebuildBlooms, 240);
+  }
+  function rebuildBlooms(){
+    var px = state.size/100*window.innerWidth;
+    if(MOBILE) px = Math.min(px, window.innerWidth*0.16);
+    var wet = state.wet/100;
+    chars.forEach(function(c){
+      if(c.space) return;
+      var cv = makeBloom(c.ch, px);
+      c.bloom.width = cv.width; c.bloom.height = cv.height;
+      c.bloom.getContext('2d').drawImage(cv, 0, 0);
+      c.bloom.style.setProperty('--bop', (0.45 + wet*0.5).toFixed(2));
+      c.bloom.classList.remove('wet-in');
+      void c.bloom.offsetWidth; // restart animation
+      c.bloom.classList.add('wet-in');
+      c.bloom.style.animationDuration = (0.8 + wet*2.1 + humidity*0.8).toFixed(2) + 's';
+    });
+    dryingUntil = performance.now() + (0.8 + wet*2.1 + humidity*0.8)*1000;
+  }
+  var dryingUntil = 0;
 
   /* ---------- split into chars ---------- */
   function split(){
     var text = spec.textContent;
     spec.innerHTML = '';
     chars = [];
-    for (var i = 0; i < text.length; i++){
-      var c = text[i];
+    for(var i=0;i<text.length;i++){
+      var ch = text[i];
       var el = document.createElement('span');
-      if (c === ' '){ el.className = 'sp'; el.innerHTML = '&nbsp;'; }
-      else { el.className = 'ch'; el.textContent = c; }
+      if(ch === ' '){ el.className='sp'; el.innerHTML='&nbsp;'; }
+      else {
+        el.className = 'ch';
+        el.textContent = ch;
+        var bloom = document.createElement('canvas');
+        bloom.className = 'bloom';
+        el.appendChild(bloom);
+      }
       spec.appendChild(el);
-      chars.push({ el: el, x: 0, y: 0, vx: 0, vy: 0, phase: i * 0.45, space: c === ' ' });
+      chars.push({ el:el, bloom:el.querySelector('.bloom'), ch:ch, x:0, y:0, vx:0, vy:0, phase:i*0.45, space:ch===' ' });
     }
     applyStatic();
+    rebuildBlooms();
   }
 
-  /* ---------- static style from sliders ---------- */
+  /* ---------- static style ---------- */
   function applyStatic(){
     spec.style.fontSize = state.size + 'vw';
-    spec.style.letterSpacing = (state.tracking / 1000) + 'em';
+    if(MOBILE) spec.style.fontSize = 'min(' + state.size + 'vw, 16vw)';
+    spec.style.letterSpacing = (state.tracking/1000) + 'em';
     spec.style.fontWeight = state.weight;
     spec.style.fontStyle = state.slant > 0 ? 'italic' : 'normal';
-    spec.style.fontVariationSettings = '"wght" ' + state.weight;
     spec.style.transform = 'skewX(' + (-state.slant) + 'deg)';
-    readout.innerHTML =
-      'Family — Instrument Serif<br>Wght ' + state.weight +
-      ' / Trk ' + (state.tracking / 1000).toFixed(2) + 'em<br>Slnt ' + state.slant + '° / Size ' + state.size + 'vw';
   }
 
   /* ---------- sliders ---------- */
-  function bind(id, vid, key, fmt){
+  function bind(id, vid, key, fmt, rebloom){
     var s = document.getElementById(id), v = document.getElementById(vid);
     s.addEventListener('input', function(){
       state[key] = +s.value;
       v.textContent = fmt(+s.value);
       applyStatic();
+      scheduleBloom();
     });
   }
-  bind('s-w', 'v-w', 'weight', function(n){ return n; });
-  bind('s-t', 'v-t', 'tracking', function(n){ return (n / 1000).toFixed(2) + 'em'; });
-  bind('s-s', 'v-s', 'slant', function(n){ return n + '°'; });
-  bind('s-z', 'v-z', 'size', function(n){ return n + 'vw'; });
+  bind('s-w','v-w','weight', function(n){ return n; });
+  bind('s-t','v-t','tracking', function(n){ return (n/1000).toFixed(2)+'em'; });
+  bind('s-s','v-s','slant', function(n){ return n+'°'; });
+  bind('s-z','v-z','size', function(n){ return n+'vw'; });
+  bind('s-wet','v-wet','wet', function(n){ return n+'%'; });
 
   /* ---------- editing ---------- */
   var editTimer = null;
@@ -176,121 +335,220 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
     editTimer = setTimeout(function(){
       var sel = window.getSelection();
       var offset = 0;
-      if (sel.rangeCount){
+      if(sel.rangeCount){
         var r = sel.getRangeAt(0).cloneRange();
         r.selectNodeContents(spec);
         r.setEnd(sel.getRangeAt(0).endContainer, sel.getRangeAt(0).endOffset);
         offset = r.toString().length;
       }
       split();
-      // restore caret
       try{
         var range = document.createRange();
         var count = 0, done = false;
         (function walk(node){
-          if (done) return;
-          if (node.nodeType === 3){
-            if (count + node.length >= offset){ range.setStart(node, Math.min(offset - count, node.length)); done = true; }
+          if(done) return;
+          if(node.nodeType === 3){
+            if(count + node.length >= offset){ range.setStart(node, Math.min(offset-count, node.length)); done = true; }
             count += node.length;
           } else {
-            for (var i = 0; i < node.childNodes.length; i++) walk(node.childNodes[i]);
+            for(var i=0;i<node.childNodes.length;i++) walk(node.childNodes[i]);
           }
         })(spec);
-        if (done){ range.collapse(true); sel.removeAllRanges(); sel.addRange(range); }
+        if(done){ range.collapse(true); sel.removeAllRanges(); sel.addRange(range); }
       }catch(e){ /* caret restore best-effort */ }
     }, 350);
   });
-  spec.addEventListener('blur', function(){ if (!spec.textContent.trim()){ spec.textContent = 'Typographia'; split(); } });
+  spec.addEventListener('blur', function(){ if(!spec.textContent.trim()){ spec.textContent='Aquarelle'; split(); } });
+
+  /* ---------- ink droplets ---------- */
+  var inkC = document.getElementById('ink');
+  var ictx = inkC.getContext('2d');
+  var IW=0, IH=0, DPR=1;
+  var drops = [], stains = [];
+  function resizeInk(){
+    DPR = Math.min(window.devicePixelRatio||1, 2);
+    IW = stage.clientWidth; IH = stage.clientHeight;
+    inkC.width = Math.round(IW*DPR); inkC.height = Math.round(IH*DPR);
+    ictx.setTransform(DPR,0,0,DPR,0,0);
+    stains = [];
+  }
+  window.addEventListener('resize', function(){ resizeInk(); scheduleBloom(); });
+
+  function splash(){
+    var sr = stage.getBoundingClientRect();
+    chars.forEach(function(c){
+      if(c.space) return;
+      var r = c.el.getBoundingClientRect();
+      var n = 3 + (Math.random()*5|0);
+      for(var i=0;i<n;i++){
+        var col = inkPick();
+        var a = Math.atan2(c.vy, c.vx) + rand(-0.9,0.9);
+        var sp = Math.sqrt(c.vx*c.vx + c.vy*c.vy)*rand(0.3,0.9) + rand(1,4);
+        drops.push({
+          x: r.left - sr.left + r.width/2,
+          y: r.top - sr.top + r.height/2,
+          vx: Math.cos(a)*sp, vy: Math.sin(a)*sp - rand(0,2),
+          r: rand(0.8, 2.6), col: col, life: rand(40, 90)
+        });
+      }
+    });
+    if(drops.length > 400) drops.splice(0, drops.length-400);
+  }
+  function stepInk(){
+    ictx.clearRect(0,0,IW,IH);
+    // stains: dry slowly
+    for(var s=0;s<stains.length;s++){
+      var st = stains[s];
+      st.alpha -= 0.0016;
+      if(st.alpha <= 0.02){ stains.splice(s,1); s--; continue; }
+      ictx.globalAlpha = st.alpha;
+      ictx.fillStyle = 'rgb('+st.col[0]+','+st.col[1]+','+st.col[2]+')';
+      ictx.beginPath();
+      ictx.arc(st.x, st.y, st.r*(1.6-st.alpha), 0, Math.PI*2); // stain halo grows as it dries
+      ictx.fill();
+    }
+    // flying drops
+    for(var i=0;i<drops.length;i++){
+      var d = drops[i];
+      d.vy += 0.32; d.vx *= 0.985; d.vy *= 0.985;
+      d.x += d.vx; d.y += d.vy;
+      d.life--;
+      ictx.globalAlpha = 0.75;
+      ictx.fillStyle = 'rgb('+d.col[0]+','+d.col[1]+','+d.col[2]+')';
+      ictx.beginPath();
+      ictx.arc(d.x, d.y, d.r, 0, Math.PI*2);
+      ictx.fill();
+      if(d.life<=0 || d.y>IH-6){
+        if(stains.length < 220) stains.push({ x:d.x, y:Math.min(d.y,IH-4), r:d.r, col:d.col, alpha:0.5 });
+        drops.splice(i,1); i--;
+      }
+    }
+    ictx.globalAlpha = 1;
+  }
 
   /* ---------- modes ---------- */
   var btns = document.querySelectorAll('.mode');
+  function explode(power){
+    chars.forEach(function(c){
+      if(c.space) return;
+      var a = Math.random()*Math.PI*2;
+      var f = power + Math.random()*power*1.6;
+      c.vx += Math.cos(a)*f;
+      c.vy += Math.sin(a)*f;
+    });
+    splash();
+  }
   btns.forEach(function(b){
     b.addEventListener('click', function(){
       var m = b.dataset.mode;
-      if (mode === m){ mode = null; b.classList.remove('on'); resetChars(); return; }
+      if(mode === m){ mode=null; b.classList.remove('on'); resetChars(); return; }
       mode = m;
-      btns.forEach(function(x){ x.classList.toggle('on', x === b); });
-      if (m === 'scatter'){
-        // explode now; spring physics in the loop pulls them home
-        chars.forEach(function(c){
-          var a = Math.random() * Math.PI * 2;
-          var f = 14 + Math.random() * 26;
-          c.vx += Math.cos(a) * f;
-          c.vy += Math.sin(a) * f;
-        });
-      } else {
-        chars.forEach(function(c){ c.vx = c.vy = 0; });
-      }
+      btns.forEach(function(x){ x.classList.toggle('on', x===b); });
+      if(m === 'scatter') explode(14);
+      else chars.forEach(function(c){ c.vx=c.vy=0; });
     });
   });
-
   function resetChars(){
-    chars.forEach(function(c){ c.el.style.transform = ''; c.x = c.y = c.vx = c.vy = 0; });
+    chars.forEach(function(c){ c.el.style.transform=''; c.x=c.y=c.vx=c.vy=0; });
   }
 
-  window.addEventListener('mousemove', function(e){ mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
+  window.addEventListener('mousemove', function(e){ mouse.x=e.clientX; mouse.y=e.clientY; }, {passive:true});
   window.addEventListener('touchmove', function(e){
-    if (e.touches[0]){ mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; }
-  }, { passive: true });
+    if(e.touches[0]){ mouse.x=e.touches[0].clientX; mouse.y=e.touches[0].clientY; }
+  }, {passive:true});
+  spec.addEventListener('mousedown', function(){ if(mode==='scatter') explode(10); });
+  spec.addEventListener('touchstart', function(){ if(mode==='scatter') explode(10); }, {passive:true});
+
+  /* ---------- ambience: rain on the studio roof (off by default) ---------- */
+  var AC=null, ambOn=false, ambMaster=null;
+  var sndBtn = document.getElementById('snd');
+  sndBtn.addEventListener('click', function(){
+    if(!ambOn){
+      AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+      if(AC.state==='suspended') AC.resume();
+      ambMaster = AC.createGain(); ambMaster.gain.value=0;
+      ambMaster.connect(AC.destination);
+      var len = AC.sampleRate*2, buf = AC.createBuffer(1,len,AC.sampleRate), dd = buf.getChannelData(0);
+      for(var i=0;i<len;i++) dd[i]=Math.random()*2-1;
+      var src = AC.createBufferSource(); src.buffer=buf; src.loop=true;
+      var hp = AC.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=900;
+      var lp = AC.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=3800;
+      var g = AC.createGain(); g.gain.value=0.05;
+      var lfo = AC.createOscillator(); lfo.frequency.value=0.4; lfo.type='triangle';
+      var lfoG = AC.createGain(); lfoG.gain.value=0.025;
+      lfo.connect(lfoG); lfoG.connect(g.gain);
+      src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(ambMaster);
+      src.start(); lfo.start();
+      ambMaster.gain.linearRampToValueAtTime(1, AC.currentTime+1.2);
+      ambOn=true; sndBtn.textContent='Sound — On'; sndBtn.setAttribute('aria-pressed','true');
+    } else {
+      ambMaster.gain.linearRampToValueAtTime(0, AC.currentTime+0.6);
+      ambOn=false; sndBtn.textContent='Sound — Off'; sndBtn.setAttribute('aria-pressed','false');
+    }
+  });
 
   /* ---------- animation loop ---------- */
-  var running = true, rafId = null;
-
+  var running = true, rafId = null, lastRead = 0;
   function frame(now){
-    if (!running) return;
-    var t = now / 1000;
+    if(!running) return;
+    var t = now/1000;
+    humidity += ((0.6 + Math.sin(t*0.05)*0.22 + (vnoise(t*0.11,3.3)-0.5)*0.1) - humidity)*0.01;
+    wind.value += (wind.target-wind.value)*0.03;
 
-    if (mode === 'wave'){
-      for (var i = 0; i < chars.length; i++){
+    if(mode === 'wave'){
+      for(var i=0;i<chars.length;i++){
         var c = chars[i];
-        if (c.space) continue;
-        var y = Math.sin(t * 2.2 + c.phase) * 0.16; // in em, scales with size
-        var rot = Math.sin(t * 2.2 + c.phase - 0.6) * 6;
+        if(c.space) continue;
+        var y = Math.sin(t*2.2 + c.phase)*0.16;
+        var rot = Math.sin(t*2.2 + c.phase - 0.6)*6;
         c.el.style.transform = 'translateY(' + y + 'em) rotate(' + rot + 'deg)';
       }
-    } else if (mode === 'orbit'){
+    } else if(mode === 'orbit'){
       var rect = spec.getBoundingClientRect();
-      var ox = rect.left + rect.width / 2, oy = rect.top + rect.height / 2;
-      var ang = Math.atan2(mouse.y - oy, mouse.x - ox);
-      for (var j = 0; j < chars.length; j++){
+      var ox = rect.left + rect.width/2, oy = rect.top + rect.height/2;
+      var ang = Math.atan2(mouse.y-oy, mouse.x-ox);
+      for(var j=0;j<chars.length;j++){
         var d = chars[j];
-        if (d.space) continue;
-        var a = ang + t * 1.6 + d.phase;
-        var rad = 0.22 + 0.1 * Math.sin(t + d.phase * 2);
+        if(d.space) continue;
+        var a = ang + t*1.6 + d.phase;
+        var rad = 0.22 + 0.1*Math.sin(t + d.phase*2);
         d.el.style.transform =
-          'translate(' + (Math.cos(a) * rad) + 'em,' + (Math.sin(a) * rad * 0.7) + 'em)' +
-          ' rotate(' + (Math.sin(a + t) * 10) + 'deg)';
+          'translate(' + (Math.cos(a)*rad) + 'em,' + (Math.sin(a)*rad*0.7) + 'em)' +
+          ' rotate(' + (Math.sin(a+t)*10) + 'deg)';
       }
-    } else if (mode === 'scatter'){
-      // spring back to origin; clicks re-explode via the mode button
-      for (var k = 0; k < chars.length; k++){
+    } else if(mode === 'scatter'){
+      for(var k=0;k<chars.length;k++){
         var s = chars[k];
-        if (s.space) continue;
-        // spring: k=0.06, damping=0.86
-        s.vx += -s.x * 0.06; s.vy += -s.y * 0.06;
+        if(s.space) continue;
+        s.vx += -s.x*0.06; s.vy += -s.y*0.06;
         s.vx *= 0.86; s.vy *= 0.86;
         s.x += s.vx; s.y += s.vy;
-        s.el.style.transform = 'translate(' + s.x + 'px,' + s.y + 'px) rotate(' + (s.x * 0.6) + 'deg)';
+        s.el.style.transform = 'translate(' + s.x + 'px,' + s.y + 'px) rotate(' + (s.x*0.6) + 'deg)';
       }
+    }
+    if(drops.length || stains.length) stepInk();
+
+    if(now-lastRead > 650){
+      lastRead = now;
+      var drying = now < dryingUntil;
+      readout.innerHTML =
+        'Family — Instrument Serif<br>Wght ' + state.weight + ' / Trk ' + (state.tracking/1000).toFixed(2) + 'em / Slnt ' + state.slant + '°' +
+        '<br>Wet ' + state.wet + '% · humidity ' + Math.round(humidity*100) + '% · ' + (drying ? 'bloom drying…' : 'ink set') +
+        '<br>wind — ' + wind.label;
     }
     rafId = requestAnimationFrame(frame);
   }
-
   document.addEventListener('visibilitychange', function(){
-    if (document.hidden){ running = false; if (rafId) cancelAnimationFrame(rafId); }
-    else if (!running){ running = true; rafId = requestAnimationFrame(frame); }
+    if(document.hidden){ running=false; if(rafId) cancelAnimationFrame(rafId); }
+    else if(!running){ running=true; rafId=requestAnimationFrame(frame); }
   });
 
-  /* re-explode scattered letters when clicking the specimen */
-  spec.addEventListener('mousedown', function(){
-    if (mode !== 'scatter') return;
-    chars.forEach(function(c){
-      var a = Math.random() * Math.PI * 2, f = 10 + Math.random() * 22;
-      c.vx += Math.cos(a) * f; c.vy += Math.sin(a) * f;
-    });
-  });
-
+  /* wait for the serif face before measuring blooms */
+  resizeInk();
   split();
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(function(){ rebuildBlooms(); });
+  }
   rafId = requestAnimationFrame(frame);
 })();
 </script>

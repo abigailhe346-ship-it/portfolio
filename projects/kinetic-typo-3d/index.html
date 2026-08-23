@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kinetic Type 3D — 3D—05</title>
+<title>Letters in Wind — Plein Air No.18</title>
 <style>
 .topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:difference;color:#fff;pointer-events:none}
 .topbar a{color:#fff;text-decoration:none;pointer-events:auto}
@@ -13,12 +13,22 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden}
-body{background:#f5f2ec;font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased}
+body{background:#dfe3da;font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased}
 #c{position:fixed;inset:0;display:block;touch-action:none}
-.hint{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(30,28,24,.42);pointer-events:none;user-select:none;white-space:nowrap}
-.tag{position:fixed;left:26px;bottom:26px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(30,28,24,.32);pointer-events:none;user-select:none}
-.load{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:rgba(30,28,24,.4);pointer-events:none;user-select:none;transition:opacity .6s ease}
+.hint{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(42,46,40,.45);pointer-events:none;user-select:none;white-space:nowrap}
+.tag{position:fixed;left:26px;bottom:64px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(42,46,40,.35);pointer-events:none;user-select:none}
+.windtag{position:fixed;left:26px;bottom:88px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(74,59,42,.55);pointer-events:none;user-select:none}
+.soundbtn{position:fixed;left:26px;bottom:22px;z-index:100;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(42,46,40,.6);background:transparent;border:1px solid rgba(42,46,40,.28);border-radius:999px;padding:8px 16px;cursor:pointer;transition:color .25s ease,border-color .25s ease}
+.soundbtn:hover{color:#2a2e28;border-color:rgba(42,46,40,.6)}
+.load{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:rgba(42,46,40,.4);pointer-events:none;user-select:none;transition:opacity .6s ease}
 .load.done{opacity:0}
+.seal{position:fixed;right:22px;bottom:18px;z-index:100;display:flex;align-items:center;gap:9px;pointer-events:none;user-select:none;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(42,46,40,.62)}
+.seal svg{display:block;width:44px;height:29px}
+.grain{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.05;mix-blend-mode:multiply;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");background-size:260px 260px}
+@media(max-width:680px){
+  .tag,.windtag{display:none}
+  .hint{bottom:64px;font-size:9px}
+}
 </style>
 <script type="importmap">
 {
@@ -30,11 +40,18 @@ body{background:#f5f2ec;font-family:'Space Grotesk',sans-serif;-webkit-font-smoo
 </script>
 </head>
 <body>
-<div class="topbar"><a href="../../index.html">← Index</a><span>3D—05 · Kinetic Type 3D</span></div>
+<div class="topbar"><a href="../../index.html">← Index</a><span>Plein Air — No.18</span></div>
 <canvas id="c"></canvas>
 <div class="load" id="load">Loading type —</div>
-<div class="tag">Orbital specimen — r / 4.6 · 6.9 · 9.2</div>
-<div class="hint">click a word</div>
+<div class="windtag" id="windtag">wind · calm</div>
+<div class="tag">Field study — r / 4.6 · 6.9 · 9.2</div>
+<button class="soundbtn" id="sndBtn">Sound · off</button>
+<div class="hint">click a word for a gust · move through the grass</div>
+<div class="seal">
+  <svg viewBox="0 0 52 34" aria-hidden="true"><path d="M7 21C13 9 25 6 32 10c6 3.4 3.6 9.6-2.4 10.6-4.8.8-8.4-2.4-6.6-6.8" fill="none" stroke="#c8442a" stroke-width="4.4" stroke-linecap="round" opacity=".9"/><path d="M11 27.5c9.5-4.4 23-5.2 34-1.8" fill="none" stroke="#c8442a" stroke-width="2.4" stroke-linecap="round" opacity=".45"/></svg>
+  <span>Plein Air — No.18</span>
+</div>
+<div class="grain"></div>
 <script type="module">
 import * as THREE from 'three';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
@@ -42,47 +59,144 @@ import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
 const canvas = document.getElementById('c');
 const DPR = Math.min(window.devicePixelRatio || 1, 2);
+const MOBILE = window.matchMedia('(pointer:coarse)').matches || window.innerWidth < 700;
 
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(DPR);
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x000000, 0);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 80);
-const CAM_BASE = new THREE.Vector3(0, 7.2, 16.5);
+scene.fog = new THREE.Fog(0xdfe3da, 34, 95);
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 120);
+const CAM_BASE = new THREE.Vector3(0, 5.6, 15.5);
 camera.position.copy(CAM_BASE);
-camera.lookAt(0, 1.1, 0);
+camera.lookAt(0, 1.2, 0);
 
-/* lighting — matte white type, crisp directional shadow */
-const hemi = new THREE.HemisphereLight(0xffffff, 0xd9d2c4, 1.0);
+/* morning-fog sky gradient */
+{
+  const bgc = document.createElement('canvas');
+  bgc.width = 2; bgc.height = 512;
+  const b = bgc.getContext('2d');
+  const g = b.createLinearGradient(0, 0, 0, 512);
+  g.addColorStop(0, '#eef0e8');
+  g.addColorStop(0.55, '#dfe3da');
+  g.addColorStop(1, '#c6cfbe');
+  b.fillStyle = g;
+  b.fillRect(0, 0, 2, 512);
+  const bgTex = new THREE.CanvasTexture(bgc);
+  bgTex.colorSpace = THREE.SRGBColorSpace;
+  scene.background = bgTex;
+}
+
+/* impressionist light — low warm sun, long shadows */
+const hemi = new THREE.HemisphereLight(0xe8ece2, 0x9fb2a8, 0.85);
 scene.add(hemi);
-const sun = new THREE.DirectionalLight(0xffffff, 2.4);
-sun.position.set(7, 13, 5);
+const sun = new THREE.DirectionalLight(0xffdfae, 2.2);
+sun.position.set(12, 4.2, 5);
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
-sun.shadow.camera.left = -13;
-sun.shadow.camera.right = 13;
-sun.shadow.camera.top = 13;
-sun.shadow.camera.bottom = -13;
-sun.shadow.camera.near = 2;
-sun.shadow.camera.far = 32;
-sun.shadow.bias = -0.0004;
+sun.shadow.mapSize.set(MOBILE ? 1024 : 2048, MOBILE ? 1024 : 2048);
+sun.shadow.camera.left = -15;
+sun.shadow.camera.right = 15;
+sun.shadow.camera.top = 15;
+sun.shadow.camera.bottom = -15;
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 40;
+sun.shadow.bias = -0.0005;
 scene.add(sun);
 
-/* shadow catcher over the paper background */
+/* shadow catcher — word shadows fall into the grass */
 const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(90, 90),
-  new THREE.ShadowMaterial({ opacity: 0.13 })
+  new THREE.PlaneGeometry(120, 120),
+  new THREE.ShadowMaterial({ color: 0x4a3b2a, opacity: 0.28 })
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
+/* ---------- grass field — 2-vertex blades, bent by a travelling gust wave ---------- */
+const BLADES = MOBILE ? 12000 : 30000;
+const grassUniforms = {
+  uTime: { value: 0 },
+  uGust: { value: 0.12 },
+  uPointer: { value: new THREE.Vector3(0, 0, 0) },
+  uWindDir: { value: new THREE.Vector2(0.86, 0.5) }
+};
+{
+  const pos = new Float32Array(BLADES * 6);
+  const tip = new Float32Array(BLADES * 2);
+  const phase = new Float32Array(BLADES * 2);
+  const len = new Float32Array(BLADES * 2);
+  for (let i = 0; i < BLADES; i++) {
+    const r = Math.sqrt(Math.random()) * 26;
+    const a = Math.random() * Math.PI * 2;
+    const x = Math.cos(a) * r;
+    const z = Math.sin(a) * r - 4;
+    const L = 0.14 + Math.pow(Math.random(), 1.6) * 0.22;
+    const ph = Math.random() * Math.PI * 2;
+    for (let k = 0; k < 2; k++) {
+      const v = i * 2 + k;
+      pos[v * 3] = x; pos[v * 3 + 1] = 0; pos[v * 3 + 2] = z;
+      tip[v] = k;
+      phase[v] = ph;
+      len[v] = L;
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('aTip', new THREE.BufferAttribute(tip, 1));
+  g.setAttribute('aPhase', new THREE.BufferAttribute(phase, 1));
+  g.setAttribute('aLen', new THREE.BufferAttribute(len, 1));
+  const m = new THREE.ShaderMaterial({
+    uniforms: grassUniforms,
+    vertexShader: `
+      attribute float aTip;
+      attribute float aPhase;
+      attribute float aLen;
+      uniform float uTime;
+      uniform float uGust;
+      uniform vec3 uPointer;
+      uniform vec2 uWindDir;
+      varying vec3 vColor;
+      void main() {
+        vec3 root = position;
+        // per-blade shimmer + a gust wave travelling across the field
+        float wave = sin(uTime * 2.2 + aPhase) * 0.3
+                   + sin(dot(root.xz, uWindDir) * 0.35 - uTime * 3.1) * 0.7;
+        float bend = aTip * aTip * aLen * (0.25 + uGust * 1.15) * (0.4 + 0.6 * (0.5 + 0.5 * wave));
+        vec2 off = uWindDir * bend;
+        // pointer stirs the grass aside
+        vec2 pd = root.xz - uPointer.xy;
+        float d = length(pd);
+        float push = uPointer.z * smoothstep(2.4, 0.0, d);
+        off += normalize(pd + vec2(0.001)) * push * aTip * 0.6;
+        vec3 p = root + vec3(off.x, aTip * aLen - bend * 0.55, off.y);
+        // deep green roots → hay-gold tips, warmer on the sun side
+        float warm = 0.5 + 0.5 * dot(normalize(root.xz + vec2(0.001)), vec2(0.86, 0.5));
+        vec3 deep = vec3(0.30, 0.42, 0.28);
+        vec3 light = mix(vec3(0.55, 0.66, 0.47), vec3(0.85, 0.64, 0.25), warm * 0.55);
+        vColor = mix(deep, light, aTip * (0.55 + 0.45 * warm));
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vColor;
+      void main() { gl_FragColor = vec4(vColor, 0.92); }
+    `,
+    transparent: true,
+    depthWrite: false
+  });
+  const grass = new THREE.LineSegments(g, m);
+  grass.frustumCulled = false;
+  grass.renderOrder = 1;
+  scene.add(grass);
+}
+
 /* orbit ring guides */
-const ringMat = new THREE.MeshBasicMaterial({ color: 0xd8d2c4 });
+const ringMat = new THREE.MeshBasicMaterial({ color: 0xb3bdab });
 const ORBITS = [
   { word: 'CREATE', r: 4.6, speed: 0.32, y: 1.5, angle: 0 },
   { word: 'DESIGN', r: 6.9, speed: -0.21, y: 0.6, angle: 2.2 },
@@ -107,7 +221,7 @@ ORBITS.forEach(o => {
   words.push(o);
 });
 
-const wordMat = new THREE.MeshStandardMaterial({ color: 0xfdfcf9, roughness: 0.9, metalness: 0 });
+const wordMat = new THREE.MeshStandardMaterial({ color: 0x2a2e28, roughness: 0.85, metalness: 0 });
 
 const loadEl = document.getElementById('load');
 new FontLoader().load(
@@ -133,49 +247,119 @@ new FontLoader().load(
   () => { loadEl.textContent = 'Font failed to load'; }
 );
 
-/* pointer: parallax + click impulse */
+/* pointer: parallax + grass stir + click gusts */
 const ray = new THREE.Raycaster();
 const ndc = new THREE.Vector2();
+const fieldPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+const fieldP = new THREE.Vector3();
 let mx = 0, my = 0, smx = 0, smy = 0;
+let stirX = 0, stirZ = 0, stirTarget = 0, stirVal = 0;
+let clickPulse = 0;
 
 window.addEventListener('pointermove', e => {
   mx = (e.clientX / window.innerWidth) * 2 - 1;
   my = (e.clientY / window.innerHeight) * 2 - 1;
+  ndc.set(mx, -my);
+  ray.setFromCamera(ndc, camera);
   if (hitMeshes.length) {
-    ndc.set(mx, -my);
-    ray.setFromCamera(ndc, camera);
     canvas.style.cursor = ray.intersectObjects(hitMeshes, false).length ? 'pointer' : 'default';
+  }
+  const p = ray.ray.intersectPlane(fieldPlane, fieldP);
+  if (p && Math.abs(p.x) < 30 && Math.abs(p.z) < 30) {
+    stirX = p.x; stirZ = p.z; stirTarget = 0.9;
   }
 }, { passive: true });
 
 canvas.addEventListener('pointerdown', e => {
-  if (!hitMeshes.length) return;
   ndc.set((e.clientX / window.innerWidth) * 2 - 1, -((e.clientY / window.innerHeight) * 2 - 1));
   ray.setFromCamera(ndc, camera);
-  const hits = ray.intersectObjects(hitMeshes, false);
+  const hits = hitMeshes.length ? ray.intersectObjects(hitMeshes, false) : [];
   if (hits.length) {
     const o = words.find(w => w.mesh === hits[0].object);
     if (o) {
       o.scaleV += 4.2;
       o.spinBoost = 5.5;
+      clickPulse = Math.max(clickPulse, 1.35); // a hard gust — grass and letters pulse together
     }
+  } else {
+    clickPulse = Math.max(clickPulse, 0.75); // a softer breath anywhere else
   }
 });
+
+/* procedural wind audio (off by default) */
+let AC = null, soundOn = false, windGain = null;
+const sndBtn = document.getElementById('sndBtn');
+sndBtn.addEventListener('click', () => {
+  soundOn = !soundOn;
+  sndBtn.textContent = soundOn ? 'Sound · on' : 'Sound · off';
+  if (soundOn && !AC) {
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    const len = 2 * AC.sampleRate;
+    const buf = AC.createBuffer(1, len, AC.sampleRate);
+    const d = buf.getChannelData(0);
+    let l = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      l = (l + 0.05 * w) / 1.05;
+      d[i] = l * 2.4;
+    }
+    const src = AC.createBufferSource();
+    src.buffer = buf; src.loop = true;
+    const f = AC.createBiquadFilter();
+    f.type = 'bandpass'; f.frequency.value = 640; f.Q.value = 0.5;
+    windGain = AC.createGain(); windGain.gain.value = 0;
+    src.connect(f); f.connect(windGain); windGain.connect(AC.destination);
+    src.start();
+  }
+  if (AC) { if (soundOn) AC.resume(); else AC.suspend(); }
+});
+
+/* ---------- world state: the wind comes in breaths — calm, a shiver of warning, then the gust ---------- */
+const windtag = document.getElementById('windtag');
+let gState = 'calm', gTimer = 2.5, gustTargetV = 0.12, gustVal = 0.12;
+let windStr = '';
 
 /* loop */
 let rafId = null;
 let last = performance.now();
 
-function tick(dt) {
+function tick(dt, t) {
+  /* gust scheduler — with a shivering preview before each front */
+  gTimer -= dt;
+  if (gTimer <= 0) {
+    if (gState === 'calm') { gState = 'preview'; gTimer = 1.1; gustTargetV = 0.34; }
+    else if (gState === 'preview') { gState = 'gust'; gTimer = 1.6 + Math.random() * 1.2; gustTargetV = 1; }
+    else { gState = 'calm'; gTimer = 2.5 + Math.random() * 3.5; gustTargetV = 0.12; }
+  }
+  gustVal += (gustTargetV - gustVal) * Math.min(1, dt * (gustTargetV > gustVal ? 2.2 : 0.9));
+  clickPulse *= Math.exp(-1.8 * dt);
+  const gust = Math.min(1.6, gustVal + clickPulse);
+  grassUniforms.uGust.value = gust;
+  grassUniforms.uTime.value = t;
+  grassUniforms.uWindDir.value.set(Math.cos(0.5 + Math.sin(t * 0.05) * 0.4), Math.sin(0.5 + Math.sin(t * 0.05) * 0.4));
+
+  const gs = gust > 0.85 ? 'gust' : gust > 0.4 ? 'rising' : gState === 'preview' ? 'a breath coming' : 'calm';
+  if (gs !== windStr) { windStr = gs; windtag.textContent = 'wind · ' + gs; }
+
+  /* pointer stir decays when the hand rests */
+  stirTarget *= Math.exp(-2.2 * dt);
+  stirVal += (stirTarget - stirVal) * Math.min(1, dt * 6);
+  grassUniforms.uPointer.value.set(stirX, stirZ, stirVal);
+
+  /* wind audio follows the field */
+  if (soundOn && AC && windGain) windGain.gain.value = 0.015 + gust * 0.2;
+
   smx += (mx - smx) * 0.05;
   smy += (my - smy) * 0.05;
-  camera.position.set(CAM_BASE.x + smx * 2.2, CAM_BASE.y - smy * 1.3, CAM_BASE.z);
-  camera.lookAt(0, 1.1, 0);
+  camera.position.set(CAM_BASE.x + smx * 2.2, CAM_BASE.y - smy * 1.2, CAM_BASE.z);
+  camera.lookAt(0, 1.2, 0);
 
+  /* letters ride the same wind — orbit speed pulses with the gusts */
+  const speedScale = 0.7 + gust * 1.2;
   words.forEach(o => {
     if (!o.mesh) return;
     o.spinBoost *= Math.exp(-1.9 * dt);
-    o.grp.rotation.y += (o.speed + o.spinBoost * Math.sign(o.speed)) * dt;
+    o.grp.rotation.y += (o.speed * speedScale + o.spinBoost * Math.sign(o.speed)) * dt;
     // spring scale back to 1
     const acc = (1 - o.scale) * 38 - o.scaleV * 6.5;
     o.scaleV += acc * dt;
@@ -190,7 +374,7 @@ function loop(now) {
   rafId = requestAnimationFrame(loop);
   const dt = Math.min((now - last) / 1000, 0.05);
   last = now;
-  tick(dt);
+  tick(dt, now / 1000);
 }
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
