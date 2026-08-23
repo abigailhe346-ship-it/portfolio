@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Workflow Builder — AGT—02</title>
+<style>
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:difference;color:#fff;pointer-events:none}
+.topbar a{color:#fff;text-decoration:none;pointer-events:auto}
+.topbar a:hover{text-decoration:underline}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<div class="topbar"><a href="../../index.html">← Index</a><span>AGT—02 · Workflow Builder</span></div>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:#0c0c0f;color:#e8e6e3;font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased}
+#stage{position:fixed;inset:0;display:block;touch-action:none;cursor:default}
+#stage.panning{cursor:grabbing}
+
+/* palette */
+#palette{position:fixed;left:20px;top:64px;z-index:50;background:#121216ee;border:1px solid #222228;border-radius:12px;padding:12px;width:172px;backdrop-filter:blur(8px)}
+#palette h5{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#5b5b64;margin-bottom:10px}
+.pal-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid #1e1e24;border-radius:8px;margin-bottom:8px;cursor:grab;user-select:none;transition:border-color .2s,transform .2s;background:#141419}
+.pal-item:hover{border-color:#3a3a46;transform:translateX(2px)}
+.pal-item:last-child{margin-bottom:0}
+.pal-item .chip{width:10px;height:10px;border-radius:3px;flex:none}
+.pal-item .nm{font-size:12px;font-weight:500}
+.pal-item .tp{font-family:'JetBrains Mono',monospace;font-size:9px;color:#5b5b64;margin-left:auto}
+#palette .note{font-family:'JetBrains Mono',monospace;font-size:9px;color:#45454e;margin-top:10px;line-height:1.7}
+
+/* controls */
+#controls{position:fixed;right:20px;top:64px;z-index:50;display:flex;gap:10px;align-items:center}
+#runBtn{display:flex;align-items:center;gap:8px;padding:11px 20px;border-radius:8px;border:1px solid #5b8def;background:#5b8def18;color:#7ba3f5;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:all .25s}
+#runBtn:hover{background:#5b8def;color:#fff}
+#runBtn:disabled{opacity:.35;cursor:default;background:#5b8def18;color:#7ba3f5}
+#zoomLvl{font-family:'JetBrains Mono',monospace;font-size:10px;color:#5b5b64;padding:11px 12px;border:1px solid #222228;border-radius:8px;background:#121216ee}
+
+/* drawer */
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,92vw);z-index:60;background:#0f0f13f5;border-left:1px solid #222228;transform:translateX(105%);transition:transform .55s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;backdrop-filter:blur(10px)}
+#drawer.open{transform:none}
+#drawer .d-head{padding:60px 20px 14px;border-bottom:1px solid #1c1c21;display:flex;justify-content:space-between;align-items:baseline}
+#drawer .d-head h3{font-family:'Instrument Serif',serif;font-weight:400;font-size:24px}
+#drawer .d-head button{background:none;border:none;color:#5b5b64;font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;letter-spacing:.1em}
+#drawer .d-head button:hover{color:#e8e6e3}
+#dBody{flex:1;overflow-y:auto;padding:16px 20px 80px;scrollbar-width:thin}
+.d-node{margin-bottom:20px;animation:dIn .5s cubic-bezier(.22,1,.36,1) both}
+@keyframes dIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.d-node .dh{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.d-node .dh .sq{width:8px;height:8px;border-radius:2px}
+.d-node .dh .ms{margin-left:auto;color:#45454e}
+.d-node .dt{font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.8;color:#9a98a2;white-space:pre-wrap;word-break:break-word}
+.d-node.skipped .dt{color:#45454e;font-style:italic}
+.d-node .cursor{display:inline-block;width:6px;height:12px;background:#7ba3f5;vertical-align:-1px;animation:blink .7s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+#dFoot{padding:12px 20px;border-top:1px solid #1c1c21;font-family:'JetBrains Mono',monospace;font-size:10px;color:#5b5b64;display:none;justify-content:space-between}
+#dFoot.show{display:flex}
+
+#hintbar{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:50;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:#45454e;background:#121216cc;padding:8px 16px;border-radius:16px;border:1px solid #1e1e24;pointer-events:none;white-space:nowrap}
+
+@media(max-width:760px){
+  #palette{width:150px;left:12px;top:56px;padding:10px}
+  #controls{right:12px;top:56px}
+  #hintbar{display:none}
+}
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+
+<div id="palette">
+  <h5>Nodes</h5>
+  <div class="pal-item" data-type="llm"><span class="chip" style="background:#5b8def"></span><span class="nm">LLM</span><span class="tp">in·out</span></div>
+  <div class="pal-item" data-type="tool"><span class="chip" style="background:#4ecb8b"></span><span class="nm">Tool</span><span class="tp">in·out</span></div>
+  <div class="pal-item" data-type="condition"><span class="chip" style="background:#f0a24e"></span><span class="nm">Condition</span><span class="tp">in·t/f</span></div>
+  <div class="pal-item" data-type="output"><span class="chip" style="background:#a99df5"></span><span class="nm">Output</span><span class="tp">in</span></div>
+  <div class="note">drag onto canvas<br>pull ports to wire</div>
+</div>
+
+<div id="controls">
+  <span id="zoomLvl">100%</span>
+  <button id="runBtn">▶ Run</button>
+</div>
+
+<div id="drawer">
+  <div class="d-head"><h3>Run Log</h3><button id="dClose">ESC ✕</button></div>
+  <div id="dBody"></div>
+  <div id="dFoot"><span id="dStat">—</span><span>SIMULATED DATA</span></div>
+</div>
+
+<div id="hintbar">drag empty space to pan · scroll to zoom · del removes selection</div>
+
+<script>
+(function(){
+'use strict';
+/* ================= setup ================= */
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d');
+let W = 0, H = 0, dpr = 1;
+function resize(){
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resize);
+resize();
+
+const TYPES = {
+  llm:      { color:'#5b8def', label:'LLM',       caption:['draft_reply','summarize','rewrite','classify'] },
+  tool:     { color:'#4ecb8b', label:'Tool',      caption:['web_search','read_url','http_post','db_query'] },
+  condition:{ color:'#f0a24e', label:'Condition', caption:['if_confident','has_results','score > 0.8'] },
+  output:   { color:'#a99df5', label:'Output',    caption:['send_email','save_doc','webhook','render_card'] }
+};
+const NODE_W = 176, NODE_HEAD = 34, PORT_ROW = 24, PORT_R = 5.5;
+
+let nodes = [], edges = [], dots = [];
+let nid = 0, eid = 0;
+const cam = { x: 0, y: 0, z: 1 };
+
+function nodeH(n){ return NODE_HEAD + 14 + Math.max(n.ins, n.outs) * PORT_ROW + 8; }
+function portPos(n, kind, i){
+  const x = kind === 'in' ? n.x : n.x + NODE_W;
+  const y = n.y + NODE_HEAD + 14 + PORT_ROW * i + PORT_ROW / 2;
+  return { x, y };
+}
+
+/* seed example graph */
+function seed(){
+  const cx = W/2, cy = H/2;
+  const a = addNode('tool', cx - 340, cy - 40,  'web_search');
+  const b = addNode('llm',  cx - 90,  cy - 110, 'summarize');
+  const c = addNode('condition', cx + 150, cy - 100, 'score > 0.8');
+  const d = addNode('output', cx + 400, cy - 170, 'send_email');
+  const e = addNode('tool',  cx + 400, cy + 20,  'db_query');
+  edges.push({ id: eid++, from: a.id, fp: 0, to: b.id, tp: 0 });
+  edges.push({ id: eid++, from: b.id, fp: 0, to: c.id, tp: 0 });
+  edges.push({ id: eid++, from: c.id, fp: 0, to: d.id, tp: 0 });
+  edges.push({ id: eid++, from: c.id, fp: 1, to: e.id, tp: 0 });
+}
+function addNode(type, x, y, caption){
+  const t = TYPES[type];
+  const n = {
+    id: nid++, type, x, y,
+    caption: caption || t.caption[Math.floor(Math.random()*t.caption.length)],
+    ins: type === 'llm' || type === 'tool' || type === 'condition' || type === 'output' ? 1 : 0,
+    outs: type === 'condition' ? 2 : (type === 'output' ? 0 : 1),
+    state: 'idle' // idle | running | done | skipped
+  };
+  nodes.push(n);
+  return n;
+}
+const getNode = id => nodes.find(n => n.id === id);
+
+/* ================= render ================= */
+let dashOff = 0, running = true;
+document.addEventListener('visibilitychange', () => { running = !document.hidden; if(running) requestAnimationFrame(frame); });
+
+function rr(x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function draw(){
+  ctx.clearRect(0, 0, W, H);
+  // grid dots
+  const gap = 28 * cam.z;
+  if(gap > 9){
+    const ox = ((cam.x % gap) + gap) % gap, oy = ((cam.y % gap) + gap) % gap;
+    ctx.fillStyle = 'rgba(255,255,255,0.055)';
+    for(let gx = ox; gx < W; gx += gap)
+      for(let gy = oy; gy < H; gy += gap)
+        ctx.fillRect(gx - 1, gy - 1, 2, 2);
+  }
+  ctx.save();
+  ctx.translate(cam.x, cam.y);
+  ctx.scale(cam.z, cam.z);
+
+  // edges
+  edges.forEach(e => {
+    const a = getNode(e.from), b = getNode(e.to);
+    if(!a || !b) return;
+    const p1 = portPos(a, 'out', e.fp), p2 = portPos(b, 'in', e.tp);
+    const fired = e.fired;
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    const dx = Math.max(46, Math.abs(p2.x - p1.x) * 0.45);
+    ctx.bezierCurveTo(p1.x + dx, p1.y, p2.x - dx, p2.y, p2.x, p2.y);
+    if(sel && sel.kind === 'edge' && sel.id === e.id){
+      ctx.strokeStyle = '#e8e6e3'; ctx.lineWidth = 2; ctx.setLineDash([]);
+    } else if(fired){
+      ctx.strokeStyle = TYPES[a.type].color; ctx.lineWidth = 2; ctx.setLineDash([]);
+      ctx.shadowColor = TYPES[a.type].color; ctx.shadowBlur = 8;
+    } else {
+      ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 1.4;
+      ctx.setLineDash([6, 6]); ctx.lineDashOffset = -dashOff;
+    }
+    ctx.stroke();
+    ctx.setLineDash([]); ctx.shadowBlur = 0;
+  });
+
+  // pending wire
+  if(wire){
+    const p1 = portPos(getNode(wire.from), 'out', wire.fp);
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    const dx = Math.max(46, Math.abs(wire.x - p1.x) * 0.45);
+    ctx.bezierCurveTo(p1.x + dx, p1.y, wire.x - dx, wire.y, wire.x, wire.y);
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 1.6;
+    ctx.setLineDash([5, 5]); ctx.lineDashOffset = -dashOff * 1.5;
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  // nodes
+  nodes.forEach(n => {
+    const t = TYPES[n.type], h = nodeH(n);
+    // status glow
+    if(n.state === 'running'){
+      ctx.shadowColor = t.color; ctx.shadowBlur = 26;
+    } else if(n.state === 'done'){
+      ctx.shadowColor = t.color; ctx.shadowBlur = 8;
+    }
+    ctx.fillStyle = n.state === 'skipped' ? '#101014' : '#141419';
+    rr(n.x, n.y, NODE_W, h, 10); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = sel && sel.kind === 'node' && sel.id === n.id ? 2 : 1;
+    ctx.strokeStyle = sel && sel.kind === 'node' && sel.id === n.id ? '#e8e6e3'
+      : n.state === 'done' ? t.color : n.state === 'running' ? t.color : '#26262e';
+    ctx.stroke();
+    // header
+    ctx.fillStyle = t.color + '22';
+    rr(n.x, n.y, NODE_W, NODE_HEAD, 10); ctx.fill();
+    ctx.fillStyle = t.color;
+    ctx.fillRect(n.x + 12, n.y + NODE_HEAD/2 - 4, 8, 8);
+    ctx.fillStyle = n.state === 'skipped' ? '#5b5b64' : '#e8e6e3';
+    ctx.font = '500 12px "Space Grotesk"';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(t.label, n.x + 28, n.y + NODE_HEAD/2 + 1);
+    ctx.fillStyle = '#5b5b64';
+    ctx.font = '10px "JetBrains Mono"';
+    ctx.textAlign = 'right';
+    ctx.fillText('#' + n.id, n.x + NODE_W - 12, n.y + NODE_HEAD/2 + 1);
+    ctx.textAlign = 'left';
+    // caption
+    ctx.fillStyle = n.state === 'skipped' ? '#45454e' : '#9a98a2';
+    ctx.font = '10.5px "JetBrains Mono"';
+    ctx.fillText(n.caption, n.x + 12, n.y + NODE_HEAD + 22);
+    // state tag
+    if(n.state !== 'idle'){
+      ctx.font = '9px "JetBrains Mono"';
+      ctx.fillStyle = n.state === 'running' ? t.color : n.state === 'done' ? t.color : '#45454e';
+      ctx.textAlign = 'right';
+      ctx.fillText(n.state.toUpperCase(), n.x + NODE_W - 12, n.y + NODE_HEAD + 22);
+      ctx.textAlign = 'left';
+    }
+    // ports
+    for(let i = 0; i < n.ins; i++){
+      const p = portPos(n, 'in', i);
+      ctx.beginPath(); ctx.arc(p.x, p.y, PORT_R, 0, 7);
+      ctx.fillStyle = '#0c0c0f'; ctx.fill();
+      ctx.strokeStyle = '#6a6a76'; ctx.lineWidth = 1.6; ctx.stroke();
+    }
+    for(let i = 0; i < n.outs; i++){
+      const p = portPos(n, 'out', i);
+      ctx.beginPath(); ctx.arc(p.x, p.y, PORT_R, 0, 7);
+      ctx.fillStyle = t.color; ctx.fill();
+      if(n.type === 'condition'){
+        ctx.fillStyle = '#5b5b64'; ctx.font = '9px "JetBrains Mono"';
+        ctx.fillText(i === 0 ? 'T' : 'F', p.x - 18, p.y + 1);
+      }
+    }
+  });
+
+  // ghost node while dragging from palette
+  if(ghost){
+    ctx.globalAlpha = 0.55;
+    const t = TYPES[ghost];
+    ctx.fillStyle = '#141419';
+    rr(ghostX - NODE_W/2, ghostY - 30, NODE_W, NODE_HEAD + 60, 10); ctx.fill();
+    ctx.strokeStyle = t.color; ctx.lineWidth = 1.4; ctx.setLineDash([4,4]); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = t.color; ctx.font = '500 12px "Space Grotesk"';
+    ctx.fillText(t.label, ghostX - NODE_W/2 + 14, ghostY - 30 + 22);
+    ctx.globalAlpha = 1;
+  }
+
+  // travelling dots
+  dots.forEach(d => {
+    const e = edges.find(x => x.id === d.eid);
+    if(!e) return;
+    const a = getNode(e.from), b = getNode(e.to);
+    if(!a || !b) return;
+    const p1 = portPos(a, 'out', e.fp), p2 = portPos(b, 'in', e.tp);
+    const dx = Math.max(46, Math.abs(p2.x - p1.x) * 0.45);
+    const t = d.t, u = 1 - t;
+    const x = u*u*u*p1.x + 3*u*u*t*(p1.x+dx) + 3*u*t*t*(p2.x-dx) + t*t*t*p2.x;
+    const y = u*u*u*p1.y + 3*u*u*t*p1.y + 3*u*t*t*p2.y + t*t*t*p2.y;
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, 7);
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = TYPES[a.type].color; ctx.shadowBlur = 14;
+    ctx.fill(); ctx.shadowBlur = 0;
+  });
+
+  ctx.restore();
+}
+
+let lastT = 0;
+function frame(t){
+  if(!running) return;
+  const dt = Math.min(50, t - lastT); lastT = t;
+  dashOff += dt * 0.02;
+  dots.forEach(d => { d.t += dt / d.dur; });
+  for(let i = dots.length - 1; i >= 0; i--){
+    if(dots[i].t >= 1){ const d = dots.splice(i, 1)[0]; d.resolve(); }
+  }
+  draw();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ================= interaction ================= */
+const s2w = (sx, sy) => ({ x: (sx - cam.x) / cam.z, y: (sy - cam.y) / cam.z });
+let dragNode = null, dragOff = {x:0,y:0}, panning = false, panStart = null;
+let wire = null, ghost = null, ghostX = 0, ghostY = 0;
+let sel = null;
+
+function hitNode(wx, wy){
+  for(let i = nodes.length - 1; i >= 0; i--){
+    const n = nodes[i];
+    if(wx >= n.x && wx <= n.x + NODE_W && wy >= n.y && wy <= n.y + nodeH(n)) return n;
+  }
+  return null;
+}
+function hitOutPort(wx, wy){
+  for(const n of nodes)
+    for(let i = 0; i < n.outs; i++){
+      const p = portPos(n, 'out', i);
+      if((wx-p.x)*(wx-p.x) + (wy-p.y)*(wy-p.y) < 13*13) return { n, i };
+    }
+  return null;
+}
+function hitInPort(wx, wy){
+  for(const n of nodes)
+    for(let i = 0; i < n.ins; i++){
+      const p = portPos(n, 'in', i);
+      if((wx-p.x)*(wx-p.x) + (wy-p.y)*(wy-p.y) < 14*14) return { n, i };
+    }
+  return null;
+}
+function hitEdge(wx, wy){
+  for(const e of edges){
+    const a = getNode(e.from), b = getNode(e.to);
+    const p1 = portPos(a, 'out', e.fp), p2 = portPos(b, 'in', e.tp);
+    const dx = Math.max(46, Math.abs(p2.x - p1.x) * 0.45);
+    let min = 1e9;
+    for(let k = 0; k <= 24; k++){
+      const t = k / 24, u = 1 - t;
+      const x = u*u*u*p1.x + 3*u*u*t*(p1.x+dx) + 3*u*t*t*(p2.x-dx) + t*t*t*p2.x;
+      const y = u*u*u*p1.y + 3*u*u*t*p1.y + 3*u*t*t*p2.y + t*t*t*p2.y;
+      const d = Math.hypot(x - wx, y - wy);
+      if(d < min) min = d;
+    }
+    if(min < 8 / cam.z) return e;
+  }
+  return null;
+}
+function createsCycle(fromId, toId){
+  const adj = {};
+  edges.forEach(e => { (adj[e.from] = adj[e.from] || []).push(e.to); });
+  (adj[fromId] = adj[fromId] || []).push(toId);
+  const seen = new Set();
+  function dfs(id){
+    if(id === fromId) return true;
+    if(seen.has(id)) return false;
+    seen.add(id);
+    return (adj[id] || []).some(dfs);
+  }
+  return dfs(toId);
+}
+
+canvas.addEventListener('pointerdown', ev => {
+  canvas.setPointerCapture(ev.pointerId);
+  const w = s2w(ev.clientX, ev.clientY);
+  const out = hitOutPort(w.x, w.y);
+  if(out){
+    wire = { from: out.n.id, fp: out.i, x: w.x, y: w.y };
+    return;
+  }
+  const n = hitNode(w.x, w.y);
+  if(n){
+    dragNode = n; dragOff = { x: w.x - n.x, y: w.y - n.y };
+    sel = { kind: 'node', id: n.id };
+    return;
+  }
+  const e = hitEdge(w.x, w.y);
+  if(e){ sel = { kind: 'edge', id: e.id }; return; }
+  sel = null;
+  panning = true;
+  panStart = { sx: ev.clientX, sy: ev.clientY, cx: cam.x, cy: cam.y };
+  canvas.classList.add('panning');
+});
+canvas.addEventListener('pointermove', ev => {
+  const w = s2w(ev.clientX, ev.clientY);
+  if(wire){ wire.x = w.x; wire.y = w.y; return; }
+  if(dragNode){ dragNode.x = w.x - dragOff.x; dragNode.y = w.y - dragOff.y; return; }
+  if(panning && panStart){
+    cam.x = panStart.cx + (ev.clientX - panStart.sx);
+    cam.y = panStart.cy + (ev.clientY - panStart.sy);
+  }
+});
+canvas.addEventListener('pointerup', ev => {
+  const w = s2w(ev.clientX, ev.clientY);
+  if(wire){
+    const inp = hitInPort(w.x, w.y);
+    if(inp && inp.n.id !== wire.from){
+      const dup = edges.some(e => e.to === inp.n.id && e.tp === inp.i);
+      if(!dup && !createsCycle(wire.from, inp.n.id)){
+        edges.push({ id: eid++, from: wire.from, fp: wire.fp, to: inp.n.id, tp: inp.i });
+      }
+    }
+    wire = null;
+  }
+  dragNode = null; panning = false; panStart = null;
+  canvas.classList.remove('panning');
+});
+canvas.addEventListener('wheel', ev => {
+  ev.preventDefault();
+  const w = s2w(ev.clientX, ev.clientY);
+  const f = Math.exp(-ev.deltaY * 0.0012);
+  cam.z = Math.min(2.4, Math.max(0.3, cam.z * f));
+  cam.x = ev.clientX - w.x * cam.z;
+  cam.y = ev.clientY - w.y * cam.z;
+  document.getElementById('zoomLvl').textContent = Math.round(cam.z * 100) + '%';
+}, { passive: false });
+
+/* palette drag / click */
+let palDownPos = null;
+document.querySelectorAll('.pal-item').forEach(item => {
+  item.addEventListener('pointerdown', ev => {
+    ev.preventDefault();
+    ghost = item.dataset.type;
+    ghostX = ev.clientX; ghostY = ev.clientY;
+    palDownPos = { x: ev.clientX, y: ev.clientY };
+    const move = e2 => { ghostX = e2.clientX; ghostY = e2.clientY; };
+    const up = e2 => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      const moved = palDownPos && Math.hypot(e2.clientX - palDownPos.x, e2.clientY - palDownPos.y) > 6;
+      const w = s2w(e2.clientX, e2.clientY);
+      if(moved) addNode(ghost, w.x - NODE_W/2, w.y - 30);
+      else { // click: drop at free spot right of palette
+        const w2 = s2w(320, 140);
+        addNode(ghost, w2.x, w2.y);
+      }
+      ghost = null; palDownPos = null;
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  });
+});
+
+/* delete */
+window.addEventListener('keydown', ev => {
+  if(ev.key === 'Escape'){ document.getElementById('drawer').classList.remove('open'); return; }
+  if((ev.key === 'Delete' || ev.key === 'Backspace') && sel && !runActive){
+    ev.preventDefault();
+    if(sel.kind === 'node'){
+      nodes = nodes.filter(n => n.id !== sel.id);
+      edges = edges.filter(e => e.from !== sel.id && e.to !== sel.id);
+    } else {
+      edges = edges.filter(e => e.id !== sel.id);
+    }
+    sel = null;
+  }
+});
+
+/* ================= run ================= */
+const drawer = document.getElementById('drawer');
+const dBody = document.getElementById('dBody');
+const runBtn = document.getElementById('runBtn');
+let runActive = false;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+const OUT_TEXT = {
+  llm: n => 'completions.create()\n\n→ Drafted 3 sections, 412 tokens.\n  Tone: concise. Confidence 0.86.\n  Passed structured payload to next node.',
+  tool: n => n.caption + ' executed\n\n→ HTTP 200 · 18.4 KB in 640ms\n  Parsed 12 records, deduplicated to 9.\n  Payload staged for downstream node.',
+  condition: n => 'evaluating: ' + n.caption + '\n\n→ expression evaluated against\n  upstream payload.',
+  output: n => n.caption + ' dispatched\n\n→ Delivered final artifact.\n  Ack received. Workflow complete ✓'
+};
+
+async function typeInto(el, text){
+  const cur = document.createElement('span');
+  cur.className = 'cursor';
+  el.appendChild(cur);
+  for(let i = 0; i < text.length; i++){
+    cur.insertAdjacentText('beforebegin', text[i]);
+    if(i % 4 === 0) await sleep(12);
+    dBody.scrollTop = 1e6;
+  }
+  cur.remove();
+}
+
+function topo(){
+  const indeg = {}, adj = {};
+  nodes.forEach(n => { indeg[n.id] = 0; adj[n.id] = []; });
+  edges.forEach(e => { indeg[e.to]++; adj[e.from].push(e.to); });
+  const q = nodes.filter(n => indeg[n.id] === 0).map(n => n.id);
+  const order = [];
+  while(q.length){
+    const id = q.shift();
+    order.push(id);
+    adj[id].forEach(m => { if(--indeg[m] === 0) q.push(m); });
+  }
+  return order;
+}
+
+function fireEdge(e){
+  e.fired = true;
+  return new Promise(res => dots.push({ eid: e.id, t: 0, dur: 620, resolve: res }));
+}
+
+async function runFlow(){
+  if(runActive || !nodes.length) return;
+  runActive = true;
+  runBtn.disabled = true;
+  nodes.forEach(n => n.state = 'idle');
+  edges.forEach(e => e.fired = false);
+  dBody.innerHTML = '';
+  document.getElementById('dFoot').classList.remove('show');
+  drawer.classList.add('open');
+  const order = topo();
+  const firedSet = new Set();
+  const t0 = performance.now();
+  let ranCount = 0;
+
+  for(const id of order){
+    const n = getNode(id);
+    if(!n) continue;
+    const incoming = edges.filter(e => e.to === id);
+    const active = incoming.length === 0 || incoming.some(e => firedSet.has(e.id));
+    if(!active){
+      n.state = 'skipped';
+      const sec = document.createElement('div');
+      sec.className = 'd-node skipped';
+      sec.innerHTML = '<div class="dh"><span class="sq" style="background:'+TYPES[n.type].color+'"></span>'+TYPES[n.type].label+' · '+n.caption+'</div><div class="dt">— skipped (branch not taken)</div>';
+      dBody.appendChild(sec);
+      continue;
+    }
+    n.state = 'running';
+    const sec = document.createElement('div');
+    sec.className = 'd-node';
+    sec.innerHTML = '<div class="dh"><span class="sq" style="background:'+TYPES[n.type].color+'"></span>'+TYPES[n.type].label+' · '+n.caption+'<span class="ms"></span></div><div class="dt"></div>';
+    dBody.appendChild(sec);
+    dBody.scrollTop = 1e6;
+    const s0 = performance.now();
+    let text = OUT_TEXT[n.type](n);
+    let chosen = -1;
+    if(n.type === 'condition'){
+      chosen = Math.random() < 0.5 ? 0 : 1;
+      text += '\n  result → ' + (chosen === 0 ? 'TRUE' : 'FALSE') + ' branch';
+    }
+    await sleep(320);
+    await typeInto(sec.querySelector('.dt'), text);
+    sec.querySelector('.ms').textContent = Math.round(performance.now() - s0) + 'ms';
+    n.state = 'done';
+    ranCount++;
+    const outs = edges.filter(e => e.from === id && (n.type !== 'condition' || e.fp === chosen));
+    for(const e of outs){ firedSet.add(e.id); }
+    await Promise.all(outs.map(fireEdge));
+    await sleep(120);
+  }
+  const stat = document.getElementById('dStat');
+  stat.textContent = ranCount + ' nodes · ' + ((performance.now() - t0)/1000).toFixed(1) + 's';
+  document.getElementById('dFoot').classList.add('show');
+  runActive = false;
+  runBtn.disabled = false;
+}
+runBtn.addEventListener('click', runFlow);
+document.getElementById('dClose').addEventListener('click', () => drawer.classList.remove('open'));
+
+seed();
+})();
+</script>
+</body>
+</html>

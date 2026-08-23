@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WEB—04 · Moodboard</title>
+<style>
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:difference;color:#fff;pointer-events:none}
+.topbar a{color:#fff;text-decoration:none;pointer-events:auto}
+.topbar a:hover{text-decoration:underline}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<div class="topbar"><a href="../../index.html">← Index</a><span>WEB—04 · Moodboard</span></div>
+<style>
+:root{
+  --bg:#e8e5de;
+  --ink:#1a1917;
+  --line:rgba(26,25,23,.12);
+  --mono:'JetBrains Mono',monospace;
+  --serif:'Instrument Serif',serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--ink);font-family:'Space Grotesk',sans-serif;
+  overflow:hidden;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(rgba(26,25,23,.14) 1px,transparent 1.5px);
+  background-size:26px 26px;
+}
+::selection{background:var(--ink);color:var(--bg)}
+
+/* ---------- toolbar ---------- */
+.toolbar{
+  position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:200;
+  display:flex;gap:10px;align-items:center;
+  font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+}
+#add{
+  font:inherit;background:var(--ink);color:var(--bg);border:none;padding:13px 22px;cursor:pointer;
+  letter-spacing:.12em;text-transform:uppercase;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s;
+}
+#add:hover{transform:translateY(-3px)}
+#add:active{transform:scale(.96)}
+.count{opacity:.5;padding:0 6px}
+
+/* ---------- cards ---------- */
+.card{
+  position:absolute;width:210px;background:#fdfcf8;
+  padding:10px 10px 14px;
+  box-shadow:0 2px 6px rgba(26,25,23,.10),0 14px 30px rgba(26,25,23,.08);
+  cursor:grab;user-select:none;-webkit-user-select:none;
+  will-change:transform;
+  transition:box-shadow .35s ease;
+  touch-action:none;
+}
+.card.dragging{cursor:grabbing;box-shadow:0 6px 14px rgba(26,25,23,.18),0 30px 60px rgba(26,25,23,.22)}
+.card .vis{height:150px;overflow:hidden;position:relative}
+.vis{background:#d8d4c8}
+.card .cap{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  padding-top:10px;opacity:.85;
+}
+.card .cap em{font-family:var(--serif);font-style:italic;font-size:15px;text-transform:none;letter-spacing:0}
+.card.closing{transition:transform .45s cubic-bezier(.55,-.2,.6,1),opacity .45s;transform:scale(0) rotate(12deg)!important;opacity:0}
+
+/* ---------- generated artworks (CSS) ---------- */
+.a1{background:linear-gradient(135deg,#d94f2b 0%,#e8a25e 55%,#f2ddc1 100%)}
+.a2{background:conic-gradient(from 90deg at 50% 50%,#1a1917 0 25%,#e8e5de 0 50%,#1a1917 0 75%,#e8e5de 0)}
+.a2::after{content:"";position:absolute;inset:22%;border-radius:50%;background:#d94f2b}
+.a3{background:repeating-linear-gradient(45deg,#2b4a8f 0 10px,#e8e5de 10px 20px)}
+.a4{background:radial-gradient(circle at 28% 30%,#f5efdd 0 18%,transparent 18.5%),radial-gradient(circle at 68% 62%,#1a1917 0 26%,transparent 26.5%),linear-gradient(120deg,#cdbf9f,#a89a72)}
+.a5{background:linear-gradient(#7a9b76 0 50%,#e8e5de 0)}
+.a5::after{content:"";position:absolute;left:50%;top:50%;width:64px;height:64px;transform:translate(-50%,-50%) rotate(45deg);background:#f2ddc1}
+.a6{background:repeating-radial-gradient(circle at 50% 120%,#b5402a 0 12px,#e8c9a0 12px 24px,#2b4a8f 24px 36px)}
+.a7{background:linear-gradient(160deg,#1a1917 55%,#3a382f 55.2%)}
+.a7::after{content:"";position:absolute;right:14%;top:16%;width:44px;height:44px;border-radius:50%;border:1.5px solid #e8e5de}
+.a8{background:linear-gradient(90deg,#e8e5de 33%,#d94f2b 33% 66%,#2b4a8f 66%)}
+
+.hint{
+  position:fixed;top:74px;left:24px;z-index:50;
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  opacity:.45;line-height:2;pointer-events:none;
+}
+@media (max-width:640px){
+  .card{width:160px}
+  .card .vis{height:114px}
+  .hint{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="hint">Drag to move — throw to glide<br>Click to bring forward<br>Double-click to remove</div>
+
+<div class="toolbar">
+  <button id="add">+ Add Card</button>
+  <span class="count" id="count"></span>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var body = document.body;
+  var zTop = 10;
+  var cards = [];
+  var idSeq = 0;
+
+  /* ---------- 6 tuned gradient recipes for new cards ---------- */
+  var recipes = [
+    'linear-gradient(140deg,#d94f2b,#f2ddc1)',
+    'linear-gradient(160deg,#2b4a8f 30%,#8fa7d6 75%,#e8e5de)',
+    'conic-gradient(from 200deg at 40% 60%,#1a1917,#5c594d,#cdbf9f,#1a1917)',
+    'radial-gradient(circle at 30% 25%,#f2ddc1,#d97b4f 55%,#7a3524)',
+    'linear-gradient(180deg,#7a9b76,#3d5a3c 70%,#1a1917)',
+    'repeating-linear-gradient(-45deg,#b5402a 0 14px,#e8c9a0 14px 28px,#2b4a8f 28px 42px)'
+  ];
+  var names = ['Terracotta','Blueprint','Dusk Wheel','Ember','Moss Field','Signal Flags'];
+
+  /* ---------- preset board ---------- */
+  var presets = [
+    { cls: 'a1', t: 'Terracotta Sun' }, { cls: 'a2', t: 'Check Orbit' },
+    { cls: 'a3', t: 'Blue Twill' },     { cls: 'a4', t: 'Moon & Stone' },
+    { cls: 'a5', t: 'Moss Horizon' },   { cls: 'a6', t: 'Arcade' },
+    { cls: 'a7', t: 'Night Ring' },     { cls: 'a8', t: 'Three Flags' }
+  ];
+
+  function vw(){ return window.innerWidth; }
+  function vh(){ return window.innerHeight; }
+  function rand(a, b){ return a + Math.random() * (b - a); }
+
+  function scatterPos(i, total){
+    // loose grid-ish scatter with jitter, avoiding the very center pile-up
+    var cols = Math.max(2, Math.floor(vw() / 260));
+    var cw = vw() / cols;
+    var col = i % cols, row = Math.floor(i / cols);
+    return {
+      x: col * cw + rand(10, Math.max(20, cw - 240)),
+      y: 150 + row * 210 + rand(-30, 40)
+    };
+  }
+
+  function makeCard(opts){
+    var el = document.createElement('div');
+    el.className = 'card';
+    var vis = document.createElement('div');
+    vis.className = 'vis' + (opts.cls ? ' ' + opts.cls : '');
+    if (opts.bg) vis.style.background = opts.bg;
+    var cap = document.createElement('div');
+    cap.className = 'cap';
+    var em = document.createElement('em');
+    em.textContent = opts.t;
+    var no = document.createElement('span');
+    no.textContent = 'Nº' + String(++idSeq).padStart(2, '0');
+    cap.appendChild(em); cap.appendChild(no);
+    el.appendChild(vis); el.appendChild(cap);
+    body.appendChild(el);
+
+    var c = {
+      el: el,
+      x: opts.x, y: opts.y,
+      rot: rand(-4, 4),
+      vx: 0, vy: 0, vr: 0,
+      dragging: false,
+      grabDX: 0, grabDY: 0,
+      lastX: 0, lastY: 0, lastT: 0,
+      dead: false
+    };
+    cards.push(c);
+    bindCard(c);
+    render(c);
+    updateCount();
+    return c;
+  }
+
+  function render(c){
+    c.el.style.transform = 'translate(' + c.x + 'px,' + c.y + 'px) rotate(' + c.rot + 'deg)';
+  }
+
+  function updateCount(){
+    document.getElementById('count').textContent = cards.filter(function(c){ return !c.dead; }).length + ' cards';
+  }
+
+  /* ---------- interaction ---------- */
+  function bindCard(c){
+    var el = c.el;
+
+    el.addEventListener('pointerdown', function(e){
+      if (c.dead) return;
+      c.dragging = true;
+      el.classList.add('dragging');
+      el.setPointerCapture(e.pointerId);
+      c.grabDX = e.clientX - c.x;
+      c.grabDY = e.clientY - c.y;
+      c.vx = c.vy = 0;
+      c.lastX = e.clientX; c.lastY = e.clientY; c.lastT = performance.now();
+      el.style.zIndex = ++zTop; // click to front
+    });
+
+    el.addEventListener('pointermove', function(e){
+      if (!c.dragging || c.dead) return;
+      var now = performance.now();
+      var dt = Math.max(1, now - c.lastT);
+      // track velocity (px/frame at 60fps)
+      c.vx = (e.clientX - c.lastX) / dt * 16.7;
+      c.vy = (e.clientY - c.lastY) / dt * 16.7;
+      c.lastX = e.clientX; c.lastY = e.clientY; c.lastT = now;
+      c.x = e.clientX - c.grabDX;
+      c.y = e.clientY - c.grabDY;
+      // tilt into the drag direction
+      c.rot += ((Math.max(-9, Math.min(9, c.vx * 0.55))) - c.rot) * 0.18;
+      render(c);
+    });
+
+    function release(){
+      if (!c.dragging) return;
+      c.dragging = false;
+      el.classList.remove('dragging');
+      // cap throw speed so it stays on the board
+      var sp = Math.hypot(c.vx, c.vy), max = 46;
+      if (sp > max){ c.vx = c.vx / sp * max; c.vy = c.vy / sp * max; }
+    }
+    el.addEventListener('pointerup', release);
+    el.addEventListener('pointercancel', release);
+
+    el.addEventListener('dblclick', function(){
+      if (c.dead) return;
+      c.dead = true;
+      el.classList.add('closing');
+      setTimeout(function(){
+        el.remove();
+        cards = cards.filter(function(x){ return x !== c; });
+        updateCount();
+      }, 480);
+    });
+  }
+
+  /* ---------- physics loop: inertia + friction + soft bounds ---------- */
+  var running = true, rafId = null;
+
+  function frame(){
+    if (!running) return;
+    for (var i = 0; i < cards.length; i++){
+      var c = cards[i];
+      if (c.dragging || c.dead) continue;
+      if (Math.abs(c.vx) < 0.02 && Math.abs(c.vy) < 0.02){
+        if (Math.abs(c.rot) > 0.02){ c.rot *= 0.9; render(c); }
+        continue;
+      }
+      c.x += c.vx; c.y += c.vy;
+      c.vx *= 0.955; c.vy *= 0.955; // friction
+      c.rot *= 0.96;                // settle tilt
+      // soft bounds: bounce with damping
+      var w = c.el.offsetWidth, h = c.el.offsetHeight;
+      if (c.x < -w * 0.4){ c.x = -w * 0.4; c.vx *= -0.5; }
+      if (c.y < 8){ c.y = 8; c.vy *= -0.5; }
+      if (c.x > vw() - w * 0.6){ c.x = vw() - w * 0.6; c.vx *= -0.5; }
+      if (c.y > vh() - h * 0.5){ c.y = vh() - h * 0.5; c.vy *= -0.5; }
+      render(c);
+    }
+    rafId = requestAnimationFrame(frame);
+  }
+
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden){ running = false; if (rafId) cancelAnimationFrame(rafId); }
+    else if (!running){ running = true; rafId = requestAnimationFrame(frame); }
+  });
+
+  /* ---------- add-card button ---------- */
+  document.getElementById('add').addEventListener('click', function(){
+    var i = Math.floor(Math.random() * recipes.length);
+    makeCard({
+      bg: recipes[i],
+      t: names[i],
+      x: rand(vw() * 0.25, vw() * 0.6),
+      y: rand(vh() * 0.2, vh() * 0.55)
+    }).el.style.zIndex = ++zTop;
+  });
+
+  /* ---------- init ---------- */
+  presets.forEach(function(p, i){
+    var pos = scatterPos(i, presets.length);
+    makeCard({ cls: p.cls, t: p.t, x: pos.x, y: pos.y });
+  });
+
+  window.addEventListener('resize', function(){
+    // keep cards on board after resize
+    cards.forEach(function(c){
+      c.x = Math.min(c.x, vw() - 80);
+      c.y = Math.min(c.y, vh() - 80);
+      render(c);
+    });
+  });
+
+  rafId = requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

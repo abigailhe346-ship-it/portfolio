@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Trace — AGT—01</title>
+<style>
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:difference;color:#fff;pointer-events:none}
+.topbar a{color:#fff;text-decoration:none;pointer-events:auto}
+.topbar a:hover{text-decoration:underline}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<div class="topbar"><a href="../../index.html">← Index</a><span>AGT—01 · Agent Trace</span></div>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:#0d0d0f;color:#e8e6e3;font-family:'Space Grotesk',sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:#c9f24e;color:#0d0d0f}
+.mono{font-family:'JetBrains Mono',monospace}
+.layout{display:grid;grid-template-columns:280px 1fr 300px;height:100vh;padding-top:52px;gap:1px;background:#1c1c21}
+.col{background:#0d0d0f;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.col-head{padding:14px 18px;border-bottom:1px solid #1c1c21;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#5b5b64;display:flex;justify-content:space-between;align-items:center;flex:none}
+.col-body{flex:1;overflow-y:auto;padding:18px;scrollbar-width:thin;scrollbar-color:#2a2a31 transparent}
+.col-body::-webkit-scrollbar{width:4px}
+.col-body::-webkit-scrollbar-thumb{background:#2a2a31;border-radius:2px}
+
+/* left column — task */
+.task-card{border:1px solid #232329;border-radius:10px;padding:20px;background:linear-gradient(160deg,#121216,#0e0e11)}
+.task-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#c9f24e;margin-bottom:12px}
+.task-text{font-family:'Instrument Serif',serif;font-size:22px;line-height:1.3;color:#f2f0ec}
+.task-meta{margin-top:18px;padding-top:14px;border-top:1px dashed #232329;font-family:'JetBrains Mono',monospace;font-size:10px;color:#5b5b64;line-height:2}
+.task-meta b{color:#9a98a2;font-weight:400}
+.run-btn{margin-top:20px;width:100%;padding:14px;border:1px solid #c9f24e;background:transparent;color:#c9f24e;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;border-radius:8px;transition:background .25s,color .25s;position:relative;overflow:hidden}
+.run-btn:hover{background:#c9f24e;color:#0d0d0f}
+.run-btn:disabled{border-color:#2a2a31;color:#4a4a52;cursor:default;background:transparent}
+.hint{margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:10px;color:#45454e;line-height:1.8}
+
+/* middle — timeline */
+.tl-step{position:relative;padding:0 0 26px 34px;animation:stepIn .5s cubic-bezier(.22,1,.36,1) both}
+@keyframes stepIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.tl-step::before{content:'';position:absolute;left:9px;top:22px;bottom:2px;width:1px;background:#232329}
+.tl-step:last-child::before{display:none}
+.dot{position:absolute;left:4px;top:8px;width:11px;height:11px;border-radius:50%;border:2px solid #3a3a44;background:#0d0d0f}
+.dot.active{border-color:#c9f24e}
+.dot.active::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:1px solid #c9f24e;animation:pulse 1.2s ease-out infinite}
+@keyframes pulse{from{transform:scale(.6);opacity:1}to{transform:scale(1.6);opacity:0}}
+.dot.done{background:#c9f24e;border-color:#c9f24e}
+.step-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.step-kind{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:3px 8px;border-radius:4px;border:1px solid}
+.k-thought{color:#a99df5;border-color:#3b3560;background:#151322}
+.k-tool{color:#c9f24e;border-color:#3d4418;background:#171a0c}
+.k-obs{color:#6ec3d8;border-color:#1d3d46;background:#0c161a}
+.k-final{color:#f0a24e;border-color:#4a3417;background:#1a130c}
+.step-title{font-size:14px;font-weight:500;color:#d8d6d2}
+.step-ms{font-family:'JetBrains Mono',monospace;font-size:10px;color:#5b5b64;margin-left:auto}
+.step-body{margin-top:10px;font-size:13px;line-height:1.75;color:#9a98a2;white-space:pre-wrap;word-break:break-word}
+.step-body .cursor{display:inline-block;width:7px;height:14px;background:#c9f24e;vertical-align:-2px;animation:blink .7s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.tool-card{margin-top:10px;border:1px solid #232329;border-radius:8px;background:#101014;overflow:hidden}
+.tool-head{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11px;color:#c9f24e;user-select:none}
+.tool-head:hover{background:#14141a}
+.tool-head .chev{margin-left:auto;color:#5b5b64;transition:transform .3s}
+.tool-card.open .chev{transform:rotate(90deg)}
+.tool-json{display:none;padding:12px 14px;border-top:1px solid #1c1c21;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.8;color:#8a8894;white-space:pre;overflow-x:auto}
+.tool-card.open .tool-json{display:block;animation:stepIn .35s cubic-bezier(.22,1,.36,1) both}
+.jk{color:#6ec3d8}.jv{color:#a99df5}.jn{color:#f0a24e}
+.summary-card{border:1px solid #f0a24e33;border-radius:12px;background:linear-gradient(165deg,#17130c,#0e0e11);padding:24px;animation:stepIn .7s cubic-bezier(.22,1,.36,1) both}
+.summary-card h3{font-family:'Instrument Serif',serif;font-weight:400;font-size:26px;color:#f2f0ec;margin-bottom:4px}
+.summary-card .sub{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#f0a24e;margin-bottom:16px}
+.summary-card p{font-size:13.5px;line-height:1.8;color:#b9b7b2;margin-bottom:12px}
+.summary-card ul{list-style:none;margin:0 0 14px}
+.summary-card li{font-size:13px;line-height:1.8;color:#9a98a2;padding-left:18px;position:relative}
+.summary-card li::before{content:'—';position:absolute;left:0;color:#f0a24e}
+.summary-card li b{color:#e8e6e3;font-weight:500}
+.sum-stats{display:flex;gap:18px;padding-top:14px;border-top:1px dashed #2a2418;font-family:'JetBrains Mono',monospace;font-size:10px;color:#5b5b64;flex-wrap:wrap}
+.sum-stats span b{color:#f0a24e;font-weight:400}
+
+/* right — memory/state */
+.mem-group{margin-bottom:22px}
+.mem-group h4{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#5b5b64;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.mem-group h4::after{content:'';flex:1;height:1px;background:#1c1c21}
+.kv{display:grid;grid-template-columns:96px 1fr;gap:6px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.7;margin-bottom:6px;animation:stepIn .45s cubic-bezier(.22,1,.36,1) both}
+.kv .k{color:#5b5b64;overflow:hidden;text-overflow:ellipsis}
+.kv .v{color:#c9c7c2;word-break:break-word}
+.kv .v.hot{color:#c9f24e}
+.kv .v .mini{display:inline-block;background:#1a1a20;border-radius:4px;padding:1px 6px;margin:1px 3px 1px 0;font-size:10px;color:#9a98a2}
+.mem-empty{font-family:'JetBrains Mono',monospace;font-size:11px;color:#3d3d46;font-style:italic}
+.badge{position:fixed;bottom:18px;right:20px;z-index:99;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.22em;color:#4a4a52;border:1px solid #232329;padding:6px 12px;border-radius:20px;background:#0d0d0fcc;pointer-events:none}
+.progress{height:2px;background:#1c1c21;border-radius:1px;overflow:hidden;margin-top:20px}
+.progress i{display:block;height:100%;width:0;background:#c9f24e;transition:width .6s cubic-bezier(.22,1,.36,1)}
+
+@media(max-width:980px){
+  body{overflow:auto}
+  .layout{grid-template-columns:1fr;height:auto}
+  .col{min-height:0}
+  .col-body{overflow:visible}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- LEFT -->
+  <section class="col">
+    <div class="col-head"><span>Task</span><span class="mono">t-4471</span></div>
+    <div class="col-body">
+      <div class="task-card">
+        <div class="task-label">◈ User Request</div>
+        <div class="task-text">Analyze competitor pricing pages and draft a summary</div>
+        <div class="task-meta">
+          <div>model &nbsp;<b>k2-agent-preview</b></div>
+          <div>tools &nbsp;<b>web_search · read_url · extract_table</b></div>
+          <div>budget <b>120k tok / 5 min</b></div>
+        </div>
+      </div>
+      <button class="run-btn" id="runBtn">▶ Run Agent</button>
+      <div class="progress"><i id="progBar"></i></div>
+      <p class="hint">The agent will decompose the task,<br>call tools, observe results, and<br>stream its reasoning step by step.</p>
+    </div>
+  </section>
+
+  <!-- MIDDLE -->
+  <section class="col">
+    <div class="col-head"><span>Execution Trace</span><span class="mono" id="elapsed">00.0s</span></div>
+    <div class="col-body" id="timeline">
+      <p class="hint" id="emptyHint" style="margin-top:8px">Awaiting run — trace will stream here.</p>
+    </div>
+  </section>
+
+  <!-- RIGHT -->
+  <section class="col">
+    <div class="col-head"><span>Memory / State</span><span class="mono">kv</span></div>
+    <div class="col-body" id="memory">
+      <div class="mem-group"><h4>Scratchpad</h4><p class="mem-empty" id="memEmpty">empty — populates at runtime</p></div>
+    </div>
+  </section>
+</div>
+<div class="badge">SIMULATED DATA</div>
+
+<script>
+(function(){
+'use strict';
+const timeline = document.getElementById('timeline');
+const memory = document.getElementById('memory');
+const runBtn = document.getElementById('runBtn');
+const elapsedEl = document.getElementById('elapsed');
+const progBar = document.getElementById('progBar');
+const emptyHint = document.getElementById('emptyHint');
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const rand = (a,b) => Math.floor(a + Math.random()*(b-a));
+
+const STEPS = [
+  { kind:'thought', title:'Planning', text:'I need to identify the main competitors first, then pull their pricing pages, extract plan tables, and compare tiers. I\'ll run a web search to find who we\'re up against.' },
+  { kind:'tool', title:'web_search', args:{ query:'competitors of acme analytics pricing', top_k:5, region:'global' },
+    obs:'Found 5 results. Top matches: Metricly (metricly.io/pricing), Databoard (databoard.app/pricing), Signalbase (signalbase.io/pricing). All three have public tier tables.' },
+  { kind:'thought', title:'Prioritizing sources', text:'Metricly and Databoard look like direct competitors — same ICP, overlapping feature sets. Signalbase is adjacent. I\'ll read the two primary pages first, then spot-check Signalbase.' },
+  { kind:'tool', title:'read_url', args:{ url:'https://metricly.io/pricing', timeout_ms:8000, render_js:true },
+    obs:'Fetched 200 OK · 34.2 KB · rendered 3 pricing tiers: Starter $29/mo, Growth $99/mo, Enterprise custom. Noted: annual billing −20%.' },
+  { kind:'tool', title:'read_url', args:{ url:'https://databoard.app/pricing', timeout_ms:8000, render_js:true },
+    obs:'Fetched 200 OK · 41.7 KB · rendered 4 tiers incl. a free plan: Free $0, Pro $49/mo, Team $149/mo, Enterprise custom. Seats are per-user for Team tier.' },
+  { kind:'tool', title:'extract_table', args:{ url:'https://metricly.io/pricing', selector:'table.plans', format:'markdown' },
+    obs:'Extracted 1 table (4 cols × 5 rows). Columns: Plan, Price/mo, Seats, Data retention. Parsed cleanly, no merged cells.' },
+  { kind:'thought', title:'Synthesizing', text:'Both competitors anchor below our $79 entry price. Metricly undercuts on entry tier; Databoard uses a free plan as a funnel. Our retention limit (12 mo) beats both. Drafting the summary now.' },
+  { kind:'final', title:'Summary drafted' }
+];
+
+const MEM_EVENTS = [
+  { group:'Goal', k:'objective', v:'competitor pricing summary', hot:true },
+  { group:'Scratchpad', k:'candidates', v:'<span class="mini">metricly.io</span><span class="mini">databoard.app</span><span class="mini">signalbase.io</span>', html:true },
+  { group:'Scratchpad', k:'priority', v:'metricly · databoard' },
+  { group:'Observation', k:'metricly.entry', v:'$29/mo · Starter', hot:true },
+  { group:'Observation', k:'databoard.entry', v:'$0 free · Pro $49/mo', hot:true },
+  { group:'Observation', k:'metricly.table', v:'4×5 markdown ✓' },
+  { group:'Insight', k:'positioning', v:'we price above both anchors', hot:true },
+  { group:'Insight', k:'advantage', v:'12-mo retention beats all', hot:true }
+];
+
+let kvStore = [];
+function memSet(group, k, v, opts){
+  opts = opts || {};
+  kvStore = kvStore.filter(e => !(e.k === k));
+  kvStore.push({group,k,v,opts});
+  renderMem();
+}
+function renderMem(){
+  const groups = {};
+  kvStore.forEach(e => { (groups[e.group] = groups[e.group] || []).push(e); });
+  let html = '';
+  Object.keys(groups).forEach(g => {
+    html += '<div class="mem-group"><h4>'+g+'</h4>';
+    groups[g].forEach(e => {
+      const val = e.opts.html ? e.v : escapeHtml(e.v);
+      html += '<div class="kv"><span class="k">'+escapeHtml(e.k)+'</span><span class="v'+(e.opts.hot?' hot':'')+'">'+val+'</span></div>';
+    });
+    html += '</div>';
+  });
+  if(!html) html = '<div class="mem-group"><h4>Scratchpad</h4><p class="mem-empty">empty — populates at runtime</p></div>';
+  memory.innerHTML = html;
+}
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function syntaxJson(obj){
+  let s = JSON.stringify(obj, null, 2);
+  s = escapeHtml(s);
+  s = s.replace(/&quot;([^&]*?)&quot;:/g, '<span class="jk">&quot;$1&quot;</span>:');
+  s = s.replace(/: &quot;(.*?)&quot;/g, ': <span class="jv">&quot;$1&quot;</span>');
+  s = s.replace(/: (\d+)/g, ': <span class="jn">$1</span>');
+  return s;
+}
+
+async function typeText(el, text, speed){
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  el.appendChild(cursor);
+  for(let i=0;i<text.length;i++){
+    cursor.insertAdjacentText('beforebegin', text[i]);
+    if(i % 3 === 0) await sleep(speed);
+    if(hidden) await waitVisible();
+    el.closest('.col-body').scrollTop = 1e6;
+  }
+  cursor.remove();
+}
+
+let hidden = false;
+document.addEventListener('visibilitychange', () => { hidden = document.hidden; });
+function waitVisible(){ return new Promise(res => {
+  const h = () => { if(!document.hidden){ document.removeEventListener('visibilitychange', h); res(); } };
+  document.addEventListener('visibilitychange', h);
+});}
+
+let startT = 0, timerId = null;
+function startTimer(){
+  startT = performance.now();
+  timerId = setInterval(() => {
+    elapsedEl.textContent = ((performance.now()-startT)/1000).toFixed(1).padStart(4,'0') + 's';
+  }, 100);
+}
+function stopTimer(){ clearInterval(timerId); }
+
+function makeStep(step){
+  const wrap = document.createElement('div');
+  wrap.className = 'tl-step';
+  const kindClass = {thought:'k-thought', tool:'k-tool', obs:'k-obs', final:'k-final'}[step.kind];
+  const kindLabel = {thought:'Thought', tool:'Tool Call', obs:'Observation', final:'Output'}[step.kind];
+  wrap.innerHTML =
+    '<span class="dot active"></span>' +
+    '<div class="step-head"><span class="step-kind '+kindClass+'">'+kindLabel+'</span>' +
+    '<span class="step-title">'+escapeHtml(step.title)+'</span>' +
+    '<span class="step-ms mono"></span></div>';
+  return wrap;
+}
+
+async function run(){
+  runBtn.disabled = true;
+  runBtn.textContent = '● Running…';
+  timeline.innerHTML = '';
+  progBar.style.width = '0%';
+  kvStore = [];
+  renderMem();
+  startTimer();
+  let memIdx = 0;
+
+  for(let i=0;i<STEPS.length;i++){
+    if(hidden) await waitVisible();
+    const step = STEPS[i];
+    const t0 = performance.now();
+
+    const el = makeStep(step);
+    timeline.appendChild(el);
+    timeline.scrollTop = 1e6;
+
+    // memory update paired with this step
+    const memEventsHere = [];
+    if(i === 0) memEventsHere.push(MEM_EVENTS[0]);
+    if(i === 1) memEventsHere.push(MEM_EVENTS[1]);
+    if(i === 2) memEventsHere.push(MEM_EVENTS[2]);
+    if(i === 3) memEventsHere.push(MEM_EVENTS[3]);
+    if(i === 4) memEventsHere.push(MEM_EVENTS[4]);
+    if(i === 5) memEventsHere.push(MEM_EVENTS[5]);
+    if(i === 6) memEventsHere.push(MEM_EVENTS[6], MEM_EVENTS[7]);
+    memEventsHere.forEach(m => { memSet(m.group, m.k, m.v, m); });
+
+    if(step.kind === 'thought'){
+      const body = document.createElement('div');
+      body.className = 'step-body';
+      el.appendChild(body);
+      await typeText(body, step.text, 14);
+    } else if(step.kind === 'tool'){
+      const card = document.createElement('div');
+      card.className = 'tool-card';
+      card.innerHTML =
+        '<div class="tool-head"><span>⚙ '+escapeHtml(step.title)+'</span><span style="color:#5b5b64">args</span><span class="chev">›</span></div>' +
+        '<div class="tool-json">'+syntaxJson(step.args)+'</div>';
+      card.querySelector('.tool-head').addEventListener('click', () => card.classList.toggle('open'));
+      el.appendChild(card);
+      await sleep(rand(350,600));
+      // observation as a sub-step
+      const obs = makeStep({kind:'obs', title: step.title + ' → result'});
+      obs.querySelector('.dot').className = 'dot active';
+      timeline.appendChild(obs);
+      const obsBody = document.createElement('div');
+      obsBody.className = 'step-body';
+      obs.appendChild(obsBody);
+      el.querySelector('.dot').className = 'dot done';
+      el.querySelector('.step-ms').textContent = Math.round(performance.now()-t0)+'ms';
+      const ot0 = performance.now();
+      await typeText(obsBody, step.obs, 10);
+      obs.querySelector('.dot').className = 'dot done';
+      obs.querySelector('.step-ms').textContent = Math.round(performance.now()-ot0)+'ms';
+      progBar.style.width = ((i+1)/STEPS.length*100) + '%';
+      continue;
+    } else if(step.kind === 'final'){
+      await sleep(400);
+      const card = document.createElement('div');
+      card.className = 'summary-card';
+      card.innerHTML =
+        '<div class="sub">◆ Final Output · summary.md</div>' +
+        '<h3>Competitor Pricing Brief</h3>' +
+        '<p>Two direct competitors anchor below Acme\'s $79 entry point. Metricly leads on price, Databoard on acquisition via a free tier.</p>' +
+        '<ul>' +
+        '<li><b>Metricly</b> — Starter $29/mo undercuts us by 63%; annual −20% deepens the gap.</li>' +
+        '<li><b>Databoard</b> — Free plan funnels SMBs; Team tier at $149/mo per-seat scales above us.</li>' +
+        '<li><b>Acme edge</b> — 12-month data retention vs. 3–6 months across both tables.</li>' +
+        '</ul>' +
+        '<p>Recommendation: hold price, message retention and compliance as the differentiator.</p>' +
+        '<div class="sum-stats"><span>steps <b>8</b></span><span>tool calls <b>4</b></span><span>tokens <b>≈ 11.4k</b></span><span>wall <b id="wallTime"></b></span></div>';
+      el.appendChild(card);
+      card.querySelector('#wallTime').textContent = ((performance.now()-startT)/1000).toFixed(1)+'s';
+      el.querySelector('.dot').className = 'dot done';
+      el.querySelector('.step-ms').textContent = 'done';
+      timeline.scrollTop = 1e6;
+      progBar.style.width = '100%';
+      stopTimer();
+      runBtn.disabled = false;
+      runBtn.textContent = '↺ Run Again';
+      return;
+    }
+
+    el.querySelector('.dot').className = 'dot done';
+    el.querySelector('.step-ms').textContent = Math.round(performance.now()-t0)+'ms';
+    progBar.style.width = ((i+1)/STEPS.length*100) + '%';
+    await sleep(rand(180, 320));
+  }
+}
+
+runBtn.addEventListener('click', run);
+})();
+</script>
+</body>
+</html>

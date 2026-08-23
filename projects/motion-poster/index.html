@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GEN—05 · Motion Poster</title>
+<style>
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:difference;color:#fff;pointer-events:none}
+.topbar a{color:#fff;text-decoration:none;pointer-events:auto}
+.topbar a:hover{text-decoration:underline}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;padding:0;height:100%;background:#060606;overflow:hidden}
+  canvas{display:block;width:100vw;height:100vh}
+  .progress{position:fixed;left:0;bottom:0;height:2px;background:#f0ece2;width:0%;z-index:30;pointer-events:none}
+  .layout-tag{position:fixed;left:24px;bottom:18px;z-index:20;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,236,226,.4);pointer-events:none}
+  .hint{position:fixed;right:24px;bottom:18px;z-index:20;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,236,226,.4);pointer-events:none;text-align:right}
+</style>
+</head>
+<body>
+<div class="topbar"><a href="../../index.html">← Index</a><span>GEN—05 · Motion Poster</span></div>
+<canvas id="c"></canvas>
+<div class="progress" id="bar"></div>
+<div class="layout-tag" id="tag">01 — Full Bleed Grid</div>
+<div class="hint">space — switch layout<br>move — ripple</div>
+<script>
+(function(){
+  'use strict';
+  var canvas = document.getElementById('c');
+  var ctx = canvas.getContext('2d');
+  var bar = document.getElementById('bar');
+  var tag = document.getElementById('tag');
+  var DPR = Math.min(window.devicePixelRatio || 1, 2);
+  var W = 0, H = 0;
+
+  var WORD = 'SYNTHETIC';
+  var ACCENT = '#ff4d00';
+  var INK = '#f0ece2';
+
+  /* ---------- cells ---------- */
+  var MAXC = 220;
+  var cells = [];
+  for (var i = 0; i < MAXC; i++){
+    cells.push({
+      x: 0, y: 0, size: 10, rot: 0, alpha: 0,
+      tx: 0, ty: 0, tsize: 10, trot: 0, talpha: 0,
+      color: INK, tcolor: INK,
+      cr: 240, cg: 236, cb: 226,
+      tr: 240, tg: 236, tb: 226,
+      wob: Math.random() * Math.PI * 2
+    });
+  }
+
+  function hexRGB(h){
+    return [parseInt(h.substr(1,2),16), parseInt(h.substr(3,2),16), parseInt(h.substr(5,2),16)];
+  }
+  var INK_RGB = hexRGB(INK), ACC_RGB = hexRGB(ACCENT);
+
+  var LAYOUT_NAMES = ['01 — Full Bleed Grid', '02 — Monolith & Orbit', '03 — Diagonal Cut'];
+  var layoutIdx = 0;
+
+  function measure(text, size, weight){
+    ctx.font = weight + ' ' + size + 'px "Space Grotesk", sans-serif';
+    return ctx.measureText(text).width;
+  }
+
+  function setTarget(c, x, y, size, rot, alpha, color){
+    c.tx = x; c.ty = y; c.tsize = size; c.trot = rot; c.talpha = alpha;
+    c.tcolor = color;
+    var rgb = color === ACCENT ? ACC_RGB : INK_RGB;
+    c.tr = rgb[0]; c.tg = rgb[1]; c.tb = rgb[2];
+  }
+
+  function computeLayout(idx){
+    var c, i, n;
+    if (idx === 0){
+      // full-bleed grid
+      var size = Math.max(14, Math.min(26, W / 52));
+      var cw = measure(WORD, size, 500) + size * 2.2;
+      var ch = size * 3.4;
+      var cols = Math.ceil(W / cw) + 1;
+      var rows = Math.ceil(H / ch) + 1;
+      i = 0;
+      for (var r = 0; r < rows; r++){
+        for (var col = 0; col < cols; col++){
+          if (i >= MAXC) break;
+          c = cells[i++];
+          var ox = (r % 2) * cw * 0.5;
+          setTarget(c, col * cw + ox - cw * 0.5, r * ch + ch * 0.5, size, 0, 1, INK);
+        }
+      }
+      for (; i < MAXC; i++) setTarget(cells[i], W/2, H/2, 1, 0, 0, INK);
+    } else if (idx === 1){
+      // monolith & orbit
+      var gSize = Math.min(W / (WORD.length * 0.58), H * 0.30);
+      c = cells[0];
+      setTarget(c, W / 2, H / 2, gSize, 0, 1, INK);
+      var ringR = Math.min(W, H) * 0.36;
+      var sSize = Math.max(10, gSize * 0.10);
+      n = 26;
+      for (i = 1; i <= n; i++){
+        c = cells[i];
+        var a = (i - 1) / n * Math.PI * 2;
+        var col2 = (i % 5 === 0) ? ACCENT : INK;
+        setTarget(c, W/2 + Math.cos(a) * ringR * 1.25, H/2 + Math.sin(a) * ringR * 0.62,
+                  sSize, a + Math.PI / 2, 1, col2);
+      }
+      // corner captions
+      var cSize = Math.max(9, sSize * 0.8);
+      var corners = [[W*0.06, H*0.08], [W*0.94, H*0.08], [W*0.06, H*0.92], [W*0.94, H*0.92]];
+      for (i = 0; i < 4; i++){
+        setTarget(cells[n + 1 + i], corners[i][0], corners[i][1], cSize, 0, 0.7, i === 1 ? ACCENT : INK);
+      }
+      for (i = n + 5; i < MAXC; i++) setTarget(cells[i], W/2, H/2, 1, 0, 0, INK);
+    } else {
+      // diagonal cut
+      var dSize = Math.max(16, Math.min(30, W / 44));
+      var spacing = measure(WORD, dSize, 500) + dSize * 2.4;
+      var lines = 9;
+      var diag = Math.sqrt(W * W + H * H);
+      i = 0;
+      for (var l = 0; l < lines; l++){
+        var off = (l / (lines - 1) - 0.5) * (H * 1.3);
+        var count = Math.ceil(diag / spacing);
+        for (var k = 0; k <= count; k++){
+          if (i >= MAXC) break;
+          c = cells[i++];
+          var d = k * spacing - diag / 2;
+          var rot = -Math.PI / 6;
+          var px = W/2 + Math.cos(rot) * d - Math.sin(rot) * off;
+          var py = H/2 + Math.sin(rot) * d + Math.cos(rot) * off;
+          var col3 = (l === Math.floor(lines/2) && k % 4 === 1) ? ACCENT : INK;
+          setTarget(c, px, py, dSize, rot, (l === Math.floor(lines/2)) ? 1 : 0.45, col3);
+        }
+      }
+      for (; i < MAXC; i++) setTarget(cells[i], W/2, H/2, 1, 0, 0, INK);
+    }
+  }
+
+  window.addEventListener('keydown', function(e){
+    if (e.code === 'Space'){
+      e.preventDefault();
+      layoutIdx = (layoutIdx + 1) % 3;
+      tag.textContent = LAYOUT_NAMES[layoutIdx];
+      computeLayout(layoutIdx);
+    }
+  });
+
+  /* ---------- mouse ripple ---------- */
+  var mx = -9999, my = -9999, emx = -9999, emy = -9999;
+  window.addEventListener('pointermove', function(e){
+    mx = e.clientX; my = e.clientY;
+    if (emx < -999) { emx = mx; emy = my; }
+  }, { passive: true });
+  window.addEventListener('pointerleave', function(){ mx = -9999; my = -9999; });
+
+  /* ---------- resize ---------- */
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    computeLayout(layoutIdx);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // snap to first layout immediately (no fly-in from 0,0)
+  cells.forEach(function(c){
+    c.x = c.tx; c.y = c.ty; c.size = c.tsize; c.rot = c.trot; c.alpha = c.talpha;
+    c.cr = c.tr; c.cg = c.tg; c.cb = c.tb;
+  });
+
+  /* ---------- loop ---------- */
+  var LOOP_MS = 9000;
+  var t0 = performance.now();
+  var running = true, rafId = 0, hiddenAt = 0;
+  var WEIGHTS = [300, 400, 500, 600];
+
+  function frame(now){
+    if (!running) return;
+    var phase = ((now - t0) % LOOP_MS) / LOOP_MS;
+    var TAU = Math.PI * 2;
+    var ph = phase * TAU;
+
+    bar.style.width = (phase * 100).toFixed(2) + '%';
+
+    ctx.fillStyle = '#060606';
+    ctx.fillRect(0, 0, W, H);
+
+    // ease ripple center
+    if (mx > -999){
+      emx += (mx - emx) * 0.12;
+      emy += (my - emy) * 0.12;
+    }
+
+    var SIG = Math.min(W, H) * 0.22, SIG2 = 2 * SIG * SIG;
+
+    for (var i = 0; i < MAXC; i++){
+      var c = cells[i];
+      // tween toward layout targets (spring-ish ease)
+      c.x += (c.tx - c.x) * 0.085;
+      c.y += (c.ty - c.y) * 0.085;
+      c.size += (c.tsize - c.size) * 0.085;
+      c.rot += (c.trot - c.rot) * 0.085;
+      c.alpha += (c.talpha - c.alpha) * 0.085;
+      c.cr += (c.tr - c.cr) * 0.085;
+      c.cg += (c.tg - c.cg) * 0.085;
+      c.cb += (c.tb - c.cb) * 0.085;
+      if (c.alpha < 0.01) continue;
+
+      // wave distortion
+      var wx = Math.sin(c.y * 0.012 + ph * 2 + c.wob * 0.3) * 7;
+      var wy = Math.cos(c.x * 0.010 + ph * 1.5) * 6;
+
+      // breathing size + weight
+      var breathe = 1 + 0.14 * Math.sin(ph * 2 + (c.x + c.y) * 0.008 + c.wob);
+      var wIdx = Math.floor((Math.sin(ph * 2 + c.x * 0.006 + c.y * 0.004) * 0.5 + 0.5) * 3.999);
+      var weight = WEIGHTS[wIdx];
+
+      // mouse ripple: local magnification + gentle push
+      var scale = breathe;
+      var dx = 0, dy = 0;
+      if (emx > -999){
+        var ddx = c.x - emx, ddy = c.y - emy;
+        var d2 = ddx * ddx + ddy * ddy;
+        var g = Math.exp(-d2 / SIG2);
+        scale *= 1 + g * 1.15;
+        if (d2 > 1){
+          var d = Math.sqrt(d2);
+          dx = (ddx / d) * g * 26;
+          dy = (ddy / d) * g * 26;
+        }
+      }
+
+      ctx.save();
+      ctx.translate(c.x + wx + dx, c.y + wy + dy);
+      ctx.rotate(c.rot + Math.sin(ph + c.wob) * 0.02);
+      var fs = Math.max(1, c.size * scale);
+      ctx.font = weight + ' ' + fs.toFixed(1) + 'px "Space Grotesk", sans-serif';
+      ctx.fillStyle = 'rgba(' + (c.cr|0) + ',' + (c.cg|0) + ',' + (c.cb|0) + ',' + c.alpha.toFixed(3) + ')';
+      ctx.fillText(WORD, 0, 0);
+      ctx.restore();
+    }
+
+    rafId = requestAnimationFrame(frame);
+  }
+  rafId = requestAnimationFrame(frame);
+
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden){
+      running = false;
+      cancelAnimationFrame(rafId);
+      hiddenAt = performance.now();
+    } else if (!running){
+      t0 += performance.now() - hiddenAt;
+      running = true;
+      rafId = requestAnimationFrame(frame);
+    }
+  });
+})();
+</script>
+</body>
+</html>

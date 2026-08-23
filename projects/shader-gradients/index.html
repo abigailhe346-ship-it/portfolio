@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GEN—03 · Shader Gradients</title>
+<style>
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:difference;color:#fff;pointer-events:none}
+.topbar a{color:#fff;text-decoration:none;pointer-events:auto}
+.topbar a:hover{text-decoration:underline}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;padding:0;height:100%;background:#000;overflow:hidden}
+  canvas{display:block;width:100vw;height:100vh}
+  .ui{position:fixed;left:0;right:0;bottom:26px;z-index:20;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;padding:0 20px;mix-blend-mode:difference;color:#fff}
+  .pill{
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:#fff;background:transparent;border:1px solid rgba(255,255,255,.45);border-radius:999px;
+    padding:9px 18px;cursor:pointer;transition:background .45s ease,color .45s ease,border-color .45s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .pill:hover{border-color:#fff}
+  .pill.active{background:#fff;color:#000;border-color:#fff}
+  .sep{width:1px;height:22px;background:rgba(255,255,255,.3);margin:0 6px}
+  #export{letter-spacing:.14em}
+  .loopinfo{position:fixed;left:24px;bottom:26px;z-index:10;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);mix-blend-mode:difference;pointer-events:none;line-height:1.9}
+  @media (max-width:640px){ .loopinfo{display:none} }
+</style>
+</head>
+<body>
+<div class="topbar"><a href="../../index.html">← Index</a><span>GEN—03 · Shader Gradients</span></div>
+<canvas id="c"></canvas>
+<div class="loopinfo">fbm · domain warping<br>seamless 12s loop</div>
+<div class="ui" id="ui">
+  <button class="pill active" data-p="0">Magma</button>
+  <button class="pill" data-p="1">Abyss</button>
+  <button class="pill" data-p="2">Bone</button>
+  <button class="pill" data-p="3">Ultraviolet</button>
+  <button class="pill" data-p="4">Meadow</button>
+  <span class="sep"></span>
+  <button class="pill" id="export">Export PNG</button>
+</div>
+<script>
+(function(){
+  'use strict';
+  var canvas = document.getElementById('c');
+  var gl = canvas.getContext('webgl', { preserveDrawingBuffer: true, antialias: false });
+  if (!gl){
+    document.body.innerHTML = '<p style="color:#fff;font-family:monospace;padding:40px">WebGL not supported.</p>';
+    return;
+  }
+
+  var VERT = [
+    'attribute vec2 aPos;',
+    'void main(){ gl_Position = vec4(aPos, 0.0, 1.0); }'
+  ].join('\n');
+
+  var FRAG = [
+    'precision highp float;',
+    'uniform vec2 uRes;',
+    'uniform float uPhase;',   // 0..1 loop phase
+    'uniform vec3 uColA;',     // deep
+    'uniform vec3 uColB;',     // mid
+    'uniform vec3 uColC;',     // highlight
+    '',
+    '// 3D simplex noise (Ashima / stegu)',
+    'vec3 mod289(vec3 x){ return x - floor(x * (1.0/289.0)) * 289.0; }',
+    'vec4 mod289(vec4 x){ return x - floor(x * (1.0/289.0)) * 289.0; }',
+    'vec4 permute(vec4 x){ return mod289(((x*34.0)+1.0)*x); }',
+    'vec4 taylorInvSqrt(vec4 r){ return 1.79284291400159 - 0.85373472095314 * r; }',
+    'float snoise(vec3 v){',
+    '  const vec2 C = vec2(1.0/6.0, 1.0/3.0);',
+    '  const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);',
+    '  vec3 i  = floor(v + dot(v, C.yyy));',
+    '  vec3 x0 = v - i + dot(i, C.xxx);',
+    '  vec3 g = step(x0.yzx, x0.xyz);',
+    '  vec3 l = 1.0 - g;',
+    '  vec3 i1 = min(g.xyz, l.zxy);',
+    '  vec3 i2 = max(g.xyz, l.zxy);',
+    '  vec3 x1 = x0 - i1 + C.xxx;',
+    '  vec3 x2 = x0 - i2 + C.yyy;',
+    '  vec3 x3 = x0 - D.yyy;',
+    '  i = mod289(i);',
+    '  vec4 p = permute(permute(permute(',
+    '        i.z + vec4(0.0, i1.z, i2.z, 1.0))',
+    '      + i.y + vec4(0.0, i1.y, i2.y, 1.0))',
+    '      + i.x + vec4(0.0, i1.x, i2.x, 1.0));',
+    '  float n_ = 0.142857142857;',
+    '  vec3 ns = n_ * D.wyz - D.xzx;',
+    '  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);',
+    '  vec4 x_ = floor(j * ns.z);',
+    '  vec4 y_ = floor(j - 7.0 * x_);',
+    '  vec4 x = x_ * ns.x + ns.yyyy;',
+    '  vec4 y = y_ * ns.x + ns.yyyy;',
+    '  vec4 h = 1.0 - abs(x) - abs(y);',
+    '  vec4 b0 = vec4(x.xy, y.xy);',
+    '  vec4 b1 = vec4(x.zw, y.zw);',
+    '  vec4 s0 = floor(b0) * 2.0 + 1.0;',
+    '  vec4 s1 = floor(b1) * 2.0 + 1.0;',
+    '  vec4 sh = -step(h, vec4(0.0));',
+    '  vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;',
+    '  vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;',
+    '  vec3 p0 = vec3(a0.xy, h.x);',
+    '  vec3 p1 = vec3(a0.zw, h.y);',
+    '  vec3 p2 = vec3(a1.xy, h.z);',
+    '  vec3 p3 = vec3(a1.zw, h.w);',
+    '  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));',
+    '  p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;',
+    '  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);',
+    '  m = m * m;',
+    '  return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));',
+    '}',
+    '',
+    'float fbm(vec3 p){',
+    '  float f = 0.0, a = 0.5;',
+    '  for (int i = 0; i < 5; i++){',
+    '    f += a * snoise(p);',
+    '    p = p * 2.03 + vec3(1.7);',
+    '    a *= 0.5;',
+    '  }',
+    '  return f;',
+    '}',
+    '',
+    'void main(){',
+    '  vec2 uv = gl_FragCoord.xy / uRes.xy;',
+    '  vec2 p = uv * 2.0 - 1.0;',
+    '  p.x *= uRes.x / uRes.y;',
+    '',
+    '  float T = 6.28318530718;',
+    '  float ang = uPhase * T;',
+    '  vec3 loop = vec3(cos(ang) * 0.55, sin(ang) * 0.55, 0.0);',
+    '',
+    '  vec3 q = vec3(0.0), r = vec3(0.0), base;',
+    '  base = vec3(p * 1.35, 0.0);',
+    '',
+    '  q.x = fbm(base + loop);',
+    '  q.y = fbm(base + vec3(5.2, 1.3, 0.0) + loop);',
+    '  r.x = fbm(base + 2.2 * q + vec3(1.7, 9.2, 0.0) + loop * 1.4);',
+    '  r.y = fbm(base + 2.4 * q + vec3(8.3, 2.8, 0.0) + loop * 1.4);',
+    '  float f = fbm(base + 2.0 * r + loop * 0.8);',
+    '',
+    '  f = f * 0.5 + 0.5;',
+    '  f = clamp(f, 0.0, 1.0);',
+    '',
+    '  float mixv = smoothstep(0.15, 0.85, f);',
+    '  vec3 col = mix(uColA, uColB, mixv);',
+    '  col = mix(col, uColC, smoothstep(0.55, 0.95, f) * length(q) * 1.1);',
+    '',
+    '  // subtle grain + vignette',
+    '  float g = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);',
+    '  col += (g - 0.5) * 0.035;',
+    '  float vig = 1.0 - 0.35 * dot(uv - 0.5, uv - 0.5) * 2.2;',
+    '  col *= vig;',
+    '',
+    '  gl_FragColor = vec4(col, 1.0);',
+    '}'
+  ].join('\n');
+
+  function compile(type, src){
+    var s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)){
+      throw new Error(gl.getShaderInfoLog(s) || 'shader error');
+    }
+    return s;
+  }
+  var prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+    throw new Error(gl.getProgramInfoLog(prog) || 'link error');
+  }
+  gl.useProgram(prog);
+
+  var buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+  var aPos = gl.getAttribLocation(prog, 'aPos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  var uRes = gl.getUniformLocation(prog, 'uRes');
+  var uPhase = gl.getUniformLocation(prog, 'uPhase');
+  var uColA = gl.getUniformLocation(prog, 'uColA');
+  var uColB = gl.getUniformLocation(prog, 'uColB');
+  var uColC = gl.getUniformLocation(prog, 'uColC');
+
+  /* ---------- palettes: [deep, mid, highlight] ---------- */
+  function hex(h){
+    return [parseInt(h.substr(1,2),16)/255, parseInt(h.substr(3,2),16)/255, parseInt(h.substr(5,2),16)/255];
+  }
+  var PALETTES = [
+    { name: 'Magma',       cols: [hex('#150300'), hex('#ff4d00'), hex('#ffd9a0')] },
+    { name: 'Abyss',       cols: [hex('#010512'), hex('#1246c8'), hex('#6ee7ff')] },
+    { name: 'Bone',        cols: [hex('#161310'), hex('#8f8678'), hex('#f0ece2')] },
+    { name: 'Ultraviolet', cols: [hex('#0b0322'), hex('#5a1ee0'), hex('#e0b3ff')] },
+    { name: 'Meadow',      cols: [hex('#061006'), hex('#2f8a3d'), hex('#d8f169')] }
+  ];
+
+  var cur = PALETTES[0].cols.map(function(c){ return c.slice(); });
+  var target = PALETTES[0].cols.map(function(c){ return c.slice(); });
+  var startCols = PALETTES[0].cols.map(function(c){ return c.slice(); });
+  var blend = 1; // 1 = settled
+
+  function setPalette(idx){
+    startCols = cur.map(function(c){ return c.slice(); });
+    target = PALETTES[idx].cols.map(function(c){ return c.slice(); });
+    blend = 0;
+  }
+
+  var pills = document.querySelectorAll('.pill[data-p]');
+  pills.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      pills.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      setPalette(parseInt(btn.getAttribute('data-p'), 10));
+    });
+  });
+
+  document.getElementById('export').addEventListener('click', function(){
+    canvas.toBlob(function(blob){
+      if (!blob) return;
+      var a = document.createElement('a');
+      var name = 'gradient-' + Date.now() + '.png';
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){
+        URL.revokeObjectURL(a.href);
+        a.remove();
+      }, 100);
+    }, 'image/png');
+  });
+
+  /* ---------- resize ---------- */
+  var DPR = 1;
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.floor(window.innerWidth * DPR);
+    canvas.height = Math.floor(window.innerHeight * DPR);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  /* ---------- loop: seamless 12s period ---------- */
+  var LOOP_MS = 12000;
+  var t0 = performance.now();
+  var running = true, rafId = 0;
+
+  function easeInOut(t){ return t * t * (3 - 2 * t); }
+
+  function frame(now){
+    if (!running) return;
+    var phase = ((now - t0) % LOOP_MS) / LOOP_MS;
+
+    if (blend < 1){
+      blend = Math.min(1, blend + 0.025);
+      var e = easeInOut(blend);
+      for (var i = 0; i < 3; i++){
+        for (var c = 0; c < 3; c++){
+          cur[i][c] = startCols[i][c] + (target[i][c] - startCols[i][c]) * e;
+        }
+      }
+    }
+
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.uniform1f(uPhase, phase);
+    gl.uniform3f(uColA, cur[0][0], cur[0][1], cur[0][2]);
+    gl.uniform3f(uColB, cur[1][0], cur[1][1], cur[1][2]);
+    gl.uniform3f(uColC, cur[2][0], cur[2][1], cur[2][2]);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    rafId = requestAnimationFrame(frame);
+  }
+  rafId = requestAnimationFrame(frame);
+
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden){
+      running = false;
+      cancelAnimationFrame(rafId);
+      // keep loop continuity by shifting t0
+      hiddenAt = performance.now();
+    } else if (!running){
+      t0 += performance.now() - hiddenAt;
+      running = true;
+      rafId = requestAnimationFrame(frame);
+    }
+  });
+  var hiddenAt = 0;
+})();
+</script>
+</body>
+</html>

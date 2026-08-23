@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GEN—01 · Flow Field</title>
+<style>
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:difference;color:#fff;pointer-events:none}
+.topbar a{color:#fff;text-decoration:none;pointer-events:auto}
+.topbar a:hover{text-decoration:underline}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;padding:0;height:100%;background:#0a0a0a;overflow:hidden}
+  canvas{display:block;width:100vw;height:100vh;cursor:crosshair}
+  .hud{position:fixed;right:24px;bottom:22px;z-index:10;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,236,226,.42);text-align:right;pointer-events:none;line-height:1.9}
+  .hint{position:fixed;left:24px;bottom:22px;z-index:10;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,236,226,.28);pointer-events:none;line-height:1.9}
+  .title{position:fixed;left:24px;top:64px;z-index:10;pointer-events:none;mix-blend-mode:difference}
+  .title h1{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:clamp(28px,4vw,52px);color:#fff;margin:0;line-height:1.05}
+  .title p{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.45);margin:10px 0 0}
+</style>
+</head>
+<body>
+<div class="topbar"><a href="../../index.html">← Index</a><span>GEN—01 · Flow Field</span></div>
+<div class="title"><h1>Ink in the Wind</h1><p>Perlin flow field — 3,200 particles</p></div>
+<div class="hud"><span id="pcount">3200</span> particles<br><span id="cname">Bone Ink</span></div>
+<div class="hint">move — disturb · click — palette · space — reborn</div>
+<canvas id="c"></canvas>
+<script>
+(function(){
+  'use strict';
+  var canvas = document.getElementById('c');
+  var ctx = canvas.getContext('2d');
+  var DPR = Math.min(window.devicePixelRatio || 1, 2);
+  var W = 0, H = 0;
+
+  /* ---------- Perlin noise (improved, 3D) ---------- */
+  var perm = new Uint8Array(512);
+  (function(){
+    var p = [], i;
+    for (i = 0; i < 256; i++) p[i] = i;
+    var seed = 1337;
+    function rnd(){ seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+    for (i = 255; i > 0; i--){
+      var j = Math.floor(rnd() * (i + 1));
+      var t = p[i]; p[i] = p[j]; p[j] = t;
+    }
+    for (i = 0; i < 512; i++) perm[i] = p[i & 255];
+  })();
+  function fade(t){ return t * t * t * (t * (t * 6 - 15) + 10); }
+  function lerp(a, b, t){ return a + t * (b - a); }
+  function grad(h, x, y, z){
+    h &= 15;
+    var u = h < 8 ? x : y;
+    var v = h < 4 ? y : (h === 12 || h === 14 ? x : z);
+    return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
+  }
+  function noise3(x, y, z){
+    var X = Math.floor(x) & 255, Y = Math.floor(y) & 255, Z = Math.floor(z) & 255;
+    x -= Math.floor(x); y -= Math.floor(y); z -= Math.floor(z);
+    var u = fade(x), v = fade(y), w = fade(z);
+    var A = perm[X] + Y, AA = perm[A] + Z, AB = perm[A + 1] + Z;
+    var B = perm[X + 1] + Y, BA = perm[B] + Z, BB = perm[B + 1] + Z;
+    return lerp(
+      lerp(lerp(grad(perm[AA], x, y, z), grad(perm[BA], x - 1, y, z), u),
+           lerp(grad(perm[AB], x, y - 1, z), grad(perm[BB], x - 1, y - 1, z), u), v),
+      lerp(lerp(grad(perm[AA + 1], x, y, z - 1), grad(perm[BA + 1], x - 1, y, z - 1), u),
+           lerp(grad(perm[AB + 1], x, y - 1, z - 1), grad(perm[BB + 1], x - 1, y - 1, z - 1), u), v),
+      w);
+  }
+
+  /* ---------- palettes ---------- */
+  var PALETTES = [
+    { name: 'Bone Ink',    colors: ['240,236,226', '226,220,205', '200,194,178'] },
+    { name: 'Vermilion',   colors: ['255,77,0',    '255,120,50',  '235,50,10']   },
+    { name: 'Electric',    colors: ['43,60,255',   '90,110,255',  '20,30,220']   }
+  ];
+  var paletteIdx = 0;
+  var cnameEl = document.getElementById('cname');
+
+  /* ---------- particles ---------- */
+  var COUNT = 3200;
+  var isMobile = Math.min(window.innerWidth, window.innerHeight) < 600;
+  if (isMobile) COUNT = 1500;
+  document.getElementById('pcount').textContent = COUNT;
+
+  var px = new Float32Array(COUNT),
+      py = new Float32Array(COUNT),
+      pvx = new Float32Array(COUNT),
+      pvy = new Float32Array(COUNT),
+      pcol = new Uint8Array(COUNT),
+      plife = new Float32Array(COUNT);
+
+  function spawn(i, anywhere){
+    px[i] = Math.random() * W;
+    py[i] = Math.random() * H;
+    if (!anywhere && Math.random() < 0.4){
+      // spawn near the flow center for denser composition
+      px[i] = W * 0.5 + (Math.random() - 0.5) * W * 0.7;
+      py[i] = H * 0.5 + (Math.random() - 0.5) * H * 0.7;
+    }
+    pvx[i] = 0; pvy[i] = 0;
+    pcol[i] = Math.floor(Math.random() * 3);
+    plife[i] = 200 + Math.random() * 600;
+  }
+
+  /* ---------- mouse disturbance ---------- */
+  var mx = -9999, my = -9999, pmx = -9999, pmy = -9999, mvx = 0, mvy = 0;
+  window.addEventListener('pointermove', function(e){
+    mx = e.clientX; my = e.clientY;
+  }, { passive: true });
+  window.addEventListener('pointerdown', function(e){
+    paletteIdx = (paletteIdx + 1) % PALETTES.length;
+    cnameEl.textContent = PALETTES[paletteIdx].name;
+    mx = e.clientX; my = e.clientY;
+  });
+  window.addEventListener('keydown', function(e){
+    if (e.code === 'Space'){
+      e.preventDefault();
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fillRect(0, 0, W, H);
+      for (var i = 0; i < COUNT; i++) spawn(i, true);
+    }
+  });
+
+  /* ---------- resize ---------- */
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, 0, W, H);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  for (var i = 0; i < COUNT; i++) spawn(i, true);
+
+  /* ---------- main loop ---------- */
+  var zt = Math.random() * 100;
+  var running = true, rafId = 0;
+
+  function frame(){
+    if (!running) return;
+
+    // mouse velocity
+    mvx += ((mx - pmx) - mvx) * 0.1;
+    mvy += ((my - pmy) - mvy) * 0.1;
+    pmx = mx; pmy = my;
+
+    // fade previous frame -> trailing hair strokes
+    ctx.fillStyle = 'rgba(10,10,10,0.045)';
+    ctx.fillRect(0, 0, W, H);
+
+    var pal = PALETTES[paletteIdx].colors;
+    var nScale = 0.0016;
+    var speed = 1.15;
+    var mR = 180, mR2 = mR * mR;
+    var mStr = Math.min(30, Math.hypot(mvx, mvy)) * 0.05;
+
+    ctx.lineWidth = 0.6;
+
+    for (var i = 0; i < COUNT; i++){
+      var x = px[i], y = py[i];
+      var a = noise3(x * nScale, y * nScale, zt) * Math.PI * 4.0;
+
+      // mouse swirl disturbance
+      var dx = x - mx, dy = y - my;
+      var d2 = dx * dx + dy * dy;
+      if (d2 < mR2 && d2 > 0.01){
+        var d = Math.sqrt(d2);
+        var f = (1 - d / mR);
+        var tx = -dy / d, ty = dx / d; // tangential swirl
+        pvx[i] += (tx * f * mStr + dx / d * f * mStr * 0.35);
+        pvy[i] += (ty * f * mStr + dy / d * f * mStr * 0.35);
+      }
+
+      var ax = Math.cos(a) * 0.22, ay = Math.sin(a) * 0.22;
+      pvx[i] += ax; pvy[i] += ay;
+      pvx[i] *= 0.965; pvy[i] *= 0.965;
+
+      var nx = x + pvx[i] * speed;
+      var ny = y + pvy[i] * speed;
+
+      ctx.strokeStyle = 'rgba(' + pal[pcol[i]] + ',0.16)';
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(nx, ny);
+      ctx.stroke();
+
+      px[i] = nx; py[i] = ny;
+
+      if (--plife[i] < 0 || nx < -20 || nx > W + 20 || ny < -20 || ny > H + 20){
+        spawn(i, false);
+      }
+    }
+    zt += 0.0015;
+
+    rafId = requestAnimationFrame(frame);
+  }
+  rafId = requestAnimationFrame(frame);
+
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden){
+      running = false;
+      cancelAnimationFrame(rafId);
+    } else if (!running){
+      running = true;
+      rafId = requestAnimationFrame(frame);
+    }
+  });
+})();
+</script>
+</body>
+</html>

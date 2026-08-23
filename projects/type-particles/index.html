@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GEN—02 · Type Particles</title>
+<style>
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:difference;color:#fff;pointer-events:none}
+.topbar a{color:#fff;text-decoration:none;pointer-events:auto}
+.topbar a:hover{text-decoration:underline}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;padding:0;height:100%;background:#050505;overflow:hidden}
+  canvas{display:block;width:100vw;height:100vh}
+  .ui{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:center;padding-top:74px;pointer-events:none}
+  .ui input{
+    pointer-events:auto;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.22);
+    color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:15px;letter-spacing:.42em;
+    text-transform:uppercase;text-align:center;padding:8px 4px;width:min(560px,72vw);outline:none;
+    transition:border-color .4s ease;
+  }
+  .ui input:focus{border-bottom-color:#2b3cff}
+  .ui input::placeholder{color:rgba(255,255,255,.25)}
+  .hud{position:fixed;right:24px;bottom:22px;z-index:10;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.35);pointer-events:none;text-align:right;line-height:1.9}
+  .hint{position:fixed;left:24px;bottom:22px;z-index:10;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.25);pointer-events:none}
+</style>
+</head>
+<body>
+<div class="topbar"><a href="../../index.html">← Index</a><span>GEN—02 · Type Particles</span></div>
+<div class="ui"><input id="word" type="text" maxlength="18" value="IMAGINATION" placeholder="Type a word" autocomplete="off" spellcheck="false"></div>
+<div class="hud">8000 particles · spring lattice</div>
+<div class="hint">move cursor to scatter — release to reassemble</div>
+<canvas id="c"></canvas>
+<script>
+(function(){
+  'use strict';
+  var canvas = document.getElementById('c');
+  var ctx = canvas.getContext('2d');
+  var DPR = Math.min(window.devicePixelRatio || 1, 2);
+  var W = 0, H = 0;
+
+  var COUNT = 8000;
+  var isMobile = Math.min(window.innerWidth, window.innerHeight) < 600;
+  if (isMobile) COUNT = 4000;
+
+  var px = new Float32Array(COUNT), py = new Float32Array(COUNT),
+      vx = new Float32Array(COUNT), vy = new Float32Array(COUNT),
+      tx = new Float32Array(COUNT), ty = new Float32Array(COUNT),
+      flash = new Float32Array(COUNT),
+      sz = new Float32Array(COUNT);
+
+  var off = document.createElement('canvas');
+  var offCtx = off.getContext('2d', { willReadFrequently: true });
+
+  var currentWord = '';
+
+  function sampleWord(word){
+    word = (word || 'IMAGINATION').toUpperCase().trim() || 'IMAGINATION';
+    if (word === currentWord && W > 0) { layout(); return; }
+    currentWord = word;
+
+    off.width = Math.max(2, Math.floor(W));
+    off.height = Math.max(2, Math.floor(H));
+    offCtx.clearRect(0, 0, off.width, off.height);
+
+    var fontSize = Math.min(W / (word.length * 0.62), H * 0.34);
+    offCtx.font = '600 ' + fontSize + 'px "Space Grotesk", sans-serif';
+    offCtx.textAlign = 'center';
+    offCtx.textBaseline = 'middle';
+    offCtx.fillStyle = '#fff';
+    offCtx.fillText(word, off.width / 2, off.height / 2);
+
+    var img = offCtx.getImageData(0, 0, off.width, off.height).data;
+    var points = [];
+    var step = Math.max(2, Math.floor(Math.min(W, H) / 220));
+    for (var y = 0; y < off.height; y += step){
+      for (var x = 0; x < off.width; x += step){
+        if (img[(y * off.width + x) * 4 + 3] > 128){
+          points.push(x, y);
+        }
+      }
+    }
+    if (points.length < 2){
+      for (var i = 0; i < COUNT; i++){ tx[i] = W / 2; ty[i] = H / 2; }
+      return;
+    }
+    for (var j = 0; j < COUNT; j++){
+      var k = (Math.random() * (points.length / 2)) | 0;
+      tx[j] = points[k * 2] + (Math.random() - 0.5) * step;
+      ty[j] = points[k * 2 + 1] + (Math.random() - 0.5) * step;
+    }
+  }
+
+  function layout(){
+    for (var i = 0; i < COUNT; i++){
+      if (px[i] === 0 && py[i] === 0){
+        px[i] = Math.random() * W;
+        py[i] = Math.random() * H;
+      }
+    }
+  }
+
+  /* ---------- input ---------- */
+  var input = document.getElementById('word');
+  var debounce = 0;
+  input.addEventListener('input', function(){
+    clearTimeout(debounce);
+    debounce = setTimeout(function(){ sampleWord(input.value); }, 350);
+  });
+
+  /* ---------- mouse ---------- */
+  var mx = -9999, my = -9999;
+  window.addEventListener('pointermove', function(e){
+    mx = e.clientX; my = e.clientY;
+  }, { passive: true });
+  window.addEventListener('pointerleave', function(){ mx = -9999; my = -9999; });
+
+  /* ---------- resize ---------- */
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.fillStyle = '#050505';
+    ctx.fillRect(0, 0, W, H);
+    var w = currentWord; currentWord = '';
+    sampleWord(w || input.value);
+  }
+  window.addEventListener('resize', resize);
+
+  /* ---------- init ---------- */
+  for (var i = 0; i < COUNT; i++){
+    px[i] = Math.random() * window.innerWidth;
+    py[i] = Math.random() * window.innerHeight;
+    vx[i] = 0; vy[i] = 0;
+    flash[i] = 0;
+    sz[i] = 1.5;
+  }
+  resize();
+
+  // wait for the display font before first sampling for accurate glyph shape
+  if (document.fonts && document.fonts.ready){
+    document.fonts.ready.then(function(){
+      var w = currentWord; currentWord = '';
+      sampleWord(w || input.value);
+    });
+  }
+
+  /* ---------- physics loop ---------- */
+  var running = true, rafId = 0;
+  var K = 0.085, DAMP = 0.86, REPEL_R = 110, REPEL_R2 = REPEL_R * REPEL_R;
+
+  function frame(){
+    if (!running) return;
+    ctx.fillStyle = 'rgba(5,5,5,0.32)';
+    ctx.fillRect(0, 0, W, H);
+
+    var half = 0.75;
+    for (var i = 0; i < COUNT; i++){
+      var dxm = px[i] - mx, dym = py[i] - my;
+      var d2 = dxm * dxm + dym * dym;
+      if (d2 < REPEL_R2 && d2 > 0.01){
+        var d = Math.sqrt(d2);
+        var f = (1 - d / REPEL_R) * 9.0;
+        vx[i] += (dxm / d) * f;
+        vy[i] += (dym / d) * f;
+        flash[i] = Math.min(1, flash[i] + 0.25);
+      }
+
+      vx[i] += (tx[i] - px[i]) * K;
+      vy[i] += (ty[i] - py[i]) * K;
+      vx[i] *= DAMP; vy[i] *= DAMP;
+      px[i] += vx[i];
+      py[i] += vy[i];
+
+      var speed2 = vx[i] * vx[i] + vy[i] * vy[i];
+      if (speed2 < 0.4 && flash[i] > 0) flash[i] *= 0.94;
+      else if (speed2 > 4) flash[i] = Math.min(1, flash[i] + 0.06);
+
+      var fl = flash[i];
+      if (fl > 0.02){
+        // blend white -> electric blue on agitation
+        var r = 255 + (43 - 255) * fl;
+        var g = 255 + (60 - 255) * fl;
+        var b = 255;
+        ctx.fillStyle = 'rgba(' + (r | 0) + ',' + (g | 0) + ',' + b + ',0.92)';
+      } else {
+        ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      }
+      ctx.fillRect(px[i] - half, py[i] - half, sz[i], sz[i]);
+    }
+
+    rafId = requestAnimationFrame(frame);
+  }
+  rafId = requestAnimationFrame(frame);
+
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden){
+      running = false;
+      cancelAnimationFrame(rafId);
+    } else if (!running){
+      running = true;
+      rafId = requestAnimationFrame(frame);
+    }
+  });
+})();
+</script>
+</body>
+</html>

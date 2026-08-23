@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abigail He — AI Portfolio</title>
+<meta name="description" content="AI-native designer & creative developer. Generative art, web experiences, agent systems, 3D.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f5f2ec; --ink:#141412; --ink-soft:#57544c;
+  --accent:#2b3cff; --vermilion:#ff4d00;
+  --line:rgba(20,20,18,.16);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::selection{background:var(--ink);color:var(--paper)}
+a{color:inherit;text-decoration:none}
+
+/* ---------- nav ---------- */
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;
+  padding:20px 32px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  mix-blend-mode:difference;color:#fff}
+.nav a{pointer-events:auto}
+.nav a:hover{text-decoration:underline;text-underline-offset:4px}
+
+/* ---------- hero ---------- */
+.hero{min-height:92vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 32px 48px;position:relative}
+.kicker{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);
+  display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:14px;margin-bottom:4vh}
+.hero h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(64px,13.5vw,220px);line-height:.92;letter-spacing:-.02em}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero h1 .row{display:block;overflow:hidden}
+.hero h1 .row span{display:inline-block;transform:translateY(110%);animation:rise 1s cubic-bezier(.19,1,.22,1) forwards}
+.hero h1 .row:nth-child(2) span{animation-delay:.12s}
+@keyframes rise{to{transform:translateY(0)}}
+.hero-sub{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;margin-top:4vh;flex-wrap:wrap}
+.hero-sub p{max-width:420px;font-size:15px;line-height:1.65;color:var(--ink-soft)}
+.hero-meta{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);text-align:right;line-height:2}
+.hero-meta b{color:var(--ink);font-weight:500}
+#lineCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:-1}
+
+/* ---------- section ---------- */
+.section{padding:12vh 32px 6vh;border-top:1px solid var(--line)}
+.sec-head{display:flex;align-items:baseline;gap:20px;margin-bottom:6vh}
+.sec-num{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;color:var(--accent)}
+.sec-title{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(34px,4.6vw,68px);line-height:1}
+.sec-count{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--ink-soft)}
+
+/* ---------- project rows ---------- */
+.plist{list-style:none;border-top:1px solid var(--line)}
+.prow{display:grid;grid-template-columns:90px 1.1fr 2fr auto 40px;align-items:center;gap:24px;
+  padding:26px 12px;border-bottom:1px solid var(--line);position:relative;isolation:isolate;cursor:pointer;transition:padding .35s cubic-bezier(.19,1,.22,1)}
+.prow::before{content:'';position:absolute;inset:0;background:var(--ink);transform:scaleY(0);transform-origin:bottom;transition:transform .45s cubic-bezier(.19,1,.22,1);z-index:-1}
+.prow:hover::before{transform:scaleY(1)}
+.prow:hover{padding-left:28px;padding-right:28px}
+.prow>*{transition:color .3s}
+.prow:hover>*{color:var(--paper)}
+.pnum{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--ink-soft)}
+.ptitle{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(22px,2.6vw,38px);line-height:1.05}
+.pdesc{font-size:13.5px;line-height:1.6;color:var(--ink-soft);max-width:520px}
+.ptags{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap}
+.parrow{font-family:'Instrument Serif',serif;font-size:26px;transform:translateX(-8px);opacity:0;transition:all .35s cubic-bezier(.19,1,.22,1)}
+.prow:hover .parrow{transform:translateX(0);opacity:1;color:var(--accent)}
+
+/* ---------- about / footer ---------- */
+.about{padding:14vh 32px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:48px}
+.about h2{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(34px,4.5vw,64px);line-height:1.05}
+.about h2 em{color:var(--vermilion)}
+.about-cols p{font-size:15px;line-height:1.75;color:var(--ink-soft);margin-bottom:20px;max-width:560px}
+.skills{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.skills span{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:999px;padding:7px 14px;transition:all .25s}
+.skills span:hover{background:var(--ink);color:var(--paper)}
+.footer{border-top:1px solid var(--line);padding:40px 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+.footer a:hover{color:var(--accent)}
+
+@media (max-width:860px){
+  .prow{grid-template-columns:56px 1fr 32px;grid-template-rows:auto auto;gap:8px 16px}
+  .pdesc{grid-column:2/3}
+  .ptags{display:none}
+  .about{grid-template-columns:1fr}
+  .nav,.hero,.section,.about,.footer{padding-left:20px;padding-right:20px}
+}
+@media (prefers-reduced-motion:reduce){
+  .hero h1 .row span{animation:none;transform:none}
+  .prow::before{transition:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#">AH—©2026</a>
+  <a href="#about">About</a>
+</nav>
+
+<header class="hero">
+  <canvas id="lineCanvas"></canvas>
+  <div class="kicker"><span>Portfolio © 2026</span><span>AI-Native Design</span><span>18 Projects</span></div>
+  <h1>
+    <span class="row"><span>Abigail <em>He</em></span></span>
+    <span class="row"><span>Creative <em>Developer</em></span></span>
+  </h1>
+  <div class="hero-sub">
+    <p>AI-native designer &amp; builder. I use generative models, code and 3D to make interfaces that feel alive — every pixel on this site is drawn by code, no images involved.</p>
+    <div class="hero-meta">
+      <b>04</b> Disciplines<br>
+      <b>18</b> Selected Works<br>
+      <b>∞</b> Curiosity
+    </div>
+  </div>
+</header>
+
+<!-- 01 GENERATIVE -->
+<section class="section" id="generative">
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <h2 class="sec-title">Generative Art</h2>
+    <span class="sec-count">05 Works</span>
+  </div>
+  <ul class="plist">
+    <li><a class="prow" href="projects/flow-field/">
+      <span class="pnum">GEN—01</span><span class="ptitle">Flow Field</span>
+      <span class="pdesc">3,200 particles tracing ink-like filaments through a Perlin flow field. Mouse bends the current; click to re-ink in three palettes.</span>
+      <span class="ptags">Canvas 2D · Noise</span><span class="parrow">→</span></a></li>
+    <li><a class="prow" href="projects/type-particles/">
+      <span class="pnum">GEN—02</span><span class="ptitle">Type Particles</span>
+      <span class="pdesc">8,000 spring-physics particles assemble into typography and scatter under your cursor. Type anything — it re-forms.</span>
+      <span class="ptags">Canvas 2D · Physics</span><span class="parrow">→</span></a></li>
+    <li><a class="prow" href="projects/shader-gradients/">
+      <span class="pnum">GEN—03</span><span class="ptitle">Shader Gradients</span>
+      <span class="pdesc">Silk-flow gradient wallpaper engine with domain-warped fbm noise, five curated palettes, seamless 12s loop, PNG export.</span>
+      <span class="ptags">WebGL · GLSL</span><span class="parrow">→</span></a></li>
+    <li><a class="prow" href="projects/perlin-landscape/">
+      <span class="pnum">GEN—04</span><span class="ptitle">Perlin Landscape</span>
+      <span class="pdesc">Woodcut-style ridgelines drifting in layered parallax. Toggle between paper-and-ink dusk and fluorescent dawn.</span>
+      <span class="ptags">Canvas 2D · fBm</span><span class="parrow">→</span></a></li>
+    <li><a class="prow" href="projects/motion-poster/">
+      <span class="pnum">GEN—05</span><span class="ptitle">Motion Poster</span>
+      <span class="pdesc">Kinetic-type poster loop with three spring-animated layouts — the feel of an AI-generated video, drawn live in 2D.</span>
+      <span class="ptags">Canvas 2D · Kinetic Type</span><span class="parrow">→</span></a></li>
+  </ul>
+</section>
+
+<!-- 02 WEB -->
+<section class="section" id="web">
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <h2 class="sec-title">Web Experiences</h2>
+    <span class="sec-count">04 Works</span>
+  </div>
+  <ul class="plist">
+    <li><a class="prow" href="projects/mono-editorial/">
+      <span class="pnum">WEB—01</span><span class="ptitle">Mono Editorial</span>
+      <span class="pdesc">Magazine-grade landing: 12vw serif headlines, sticky horizontal gallery, word-by-word scroll reveals, buttery Lenis scrolling.</span>
+      <span class="ptags">Lenis · Scroll</span><span class="parrow">→</span></a></li>
+    <li><a class="prow" href="projects/product-orb/">
+      <span class="pnum">WEB—02</span><span class="ptitle">Product Orb</span>
+      <span class="pdesc">Scroll-driven launch page: 900 particles morph from a breathing orb into a grid, then into a product silhouette across three acts.</span>
+      <span class="ptags">Canvas 2D · Scroll-driven</span><span class="parrow">→</span></a></li>
+    <li><a class="prow" href="projects/type-lab/">
+      <span class="pnum">WEB—03</span><span class="ptitle">Type Lab</span>
+      <span class="pdesc">A variable-type playground — weight, tracking, slant, size on giant editable type, with wave, orbit and scatter physics modes.</span>
+      <span class="ptags">Typography · Springs</span><span class="parrow">→</span></a></li>
+    <li><a class="prow" href="projects/moodboard/">
+      <span class="pnum">WEB—04</span><span class="ptitle">Moodboard</span>
+      <span class="pdesc">A cork-board for ideas: draggable cards with inertia and friction, tilt-on-drag, generative gradient cards on demand.</span>
+      <span class="ptags">Pointer · Inertia</span><span class="parrow">→</span></a></li>
+  </ul>
+</section>
+
+<!-- 03 AGENT -->
+<section class="section" id="agent">
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <h2 class="sec-title">Agent Systems</h2>
+    <span class="sec-count">04 Works</span>
+  </div>
+  <ul class="plist">
+    <li><a class="prow" href="projects/agent-trace/">
+      <span class="pnum">AGT—01</span><span class="ptitle">Agent Trace</span>
+      <span class="pdesc">An agent's reasoning made visible: streaming thoughts, expandable tool-call JSON, live memory panel, final briefing card.</span>
+      <span class="ptags">UI Systems · Streaming</span><span class="parrow">→</span></a></li>
+    <li><a class="prow" href="projects/workflow-builder/">
+      <span class="pnum">AGT—02</span><span class="ptitle">Workflow Builder</span>
+      <span class="pdesc">Infinite-canvas node editor — drag LLM / Tool / Condition / Output nodes, wire bezier edges, run it and watch light flow through the graph.</span>
+      <span class="ptags">Canvas · Graph Engine</span><span class="parrow">→</span></a></li>
+    <li><a class="prow" href="projects/multi-agent-chat/">
+      <span class="pnum">AGT—03</span><span class="ptitle">Multi-Agent</span>
+      <span class="pdesc">Planner, Researcher and Critic argue their way to consensus — a live gauge tracks agreement as the deliverable takes shape.</span>
+      <span class="ptags">Multi-Agent · Simulation</span><span class="parrow">→</span></a></li>
+    <li><a class="prow" href="projects/prompt-playground/">
+      <span class="pnum">AGT—04</span><span class="ptitle">Prompt Chain</span>
+      <span class="pdesc">A prompt-chain workbench: templated steps with variable highlighting, temperature control, token cost stats and run-to-run word diffing.</span>
+      <span class="ptags">IDE UI · Diff Engine</span><span class="parrow">→</span></a></li>
+  </ul>
+</section>
+
+<!-- 04 3D -->
+<section class="section" id="3d">
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <h2 class="sec-title">3D &amp; WebGL</h2>
+    <span class="sec-count">05 Works</span>
+  </div>
+  <ul class="plist">
+    <li><a class="prow" href="projects/product-viewer/">
+      <span class="pnum">3D—01</span><span class="ptitle">Product Viewer</span>
+      <span class="pdesc">A procedural perfume bottle with studio lighting, mirror floor and swappable glass / metal / ceramic PBR materials.</span>
+      <span class="ptags">Three.js · PBR</span><span class="parrow">→</span></a></li>
+    <li><a class="prow" href="projects/blob-sculpture/">
+      <span class="pnum">3D—02</span><span class="ptitle">Blob Sculpture</span>
+      <span class="pdesc">245k vertices displaced by simplex noise in the vertex shader, wearing an iridescent oil-slick material. Drag to sculpt your view.</span>
+      <span class="ptags">GLSL · Iridescence</span><span class="parrow">→</span></a></li>
+    <li><a class="prow" href="projects/grid-city/">
+      <span class="pnum">3D—03</span><span class="ptitle">Grid City</span>
+      <span class="pdesc">A procedural night city — 18,000 emissive windows, passing car lights, fog — with a one-click dawn that kills the neon.</span>
+      <span class="ptags">Instancing · Procedural</span><span class="parrow">→</span></a></li>
+    <li><a class="prow" href="projects/particle-galaxy/">
+      <span class="pnum">3D—04</span><span class="ptitle">Particle Galaxy</span>
+      <span class="pdesc">Scroll to dive through a 100,000-particle spiral galaxy — FOV stretches as you cross the core and look back.</span>
+      <span class="ptags">Shaders · Scroll-driven</span><span class="parrow">→</span></a></li>
+    <li><a class="prow" href="projects/kinetic-typo-3d/">
+      <span class="pnum">3D—05</span><span class="ptitle">Kinetic Type 3D</span>
+      <span class="pdesc">CREATE · DESIGN · BUILD orbiting on three rings in sharp daylight shadow. Click a word — it spins up and springs back.</span>
+      <span class="ptags">Three.js · TextGeometry</span><span class="parrow">→</span></a></li>
+  </ul>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <h2>Design with <em>models</em>,<br>build with <em>code</em>.</h2>
+  <div class="about-cols">
+    <p>I work at the seam of AI and design: generating visuals with models, shaping them into living interfaces with code, and prototyping the agent systems that will power the next generation of products.</p>
+    <p>This portfolio itself is the proof of work — 18 interactive pieces spanning generative art, editorial web design, agent UX and real-time 3D. Every visual is computed at runtime.</p>
+    <div class="skills">
+      <span>AI Image / Video</span><span>Vibe Coding</span><span>Agent Systems</span>
+      <span>Three.js / GLSL</span><span>Creative Coding</span><span>Design Engineering</span>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <span>© 2026 Abigail He</span>
+  <span>100% code-drawn · zero image assets</span>
+  <a href="mailto:hello@example.com">hello@example.com ↗</a>
+</footer>
+
+<script>
+// hero canvas: a quiet horizontal ink line that breathes with the mouse
+(function(){
+  const cv = document.getElementById('lineCanvas'), ctx = cv.getContext('2d');
+  let w, h, dpr, mx = .5, my = .5, tmx = .5, tmy = .5, t = 0, raf;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function resize(){
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    w = cv.clientWidth; h = cv.clientHeight;
+    cv.width = w * dpr; cv.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function noise(x){ return Math.sin(x*1.7)*.5 + Math.sin(x*3.1+1.3)*.3 + Math.sin(x*5.7+2.1)*.2; }
+  function frame(){
+    t += .008; tmx += (mx - tmx) * .04; tmy += (my - tmy) * .04;
+    ctx.clearRect(0, 0, w, h);
+    const baseY = h * (.34 + tmy * .1), amp = 14 + tmx * 46;
+    for (let layer = 0; layer < 3; layer++){
+      ctx.beginPath();
+      const alpha = .05 + layer * .04;
+      ctx.strokeStyle = layer === 2 ? `rgba(43,60,255,${alpha + .03})` : `rgba(20,20,18,${alpha})`;
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= w; x += 4){
+        const p = x / w;
+        const y = baseY + layer * 26 + noise(p * 6 + t * (1 + layer * .3)) * amp * Math.sin(p * Math.PI);
+        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    raf = requestAnimationFrame(frame);
+  }
+  addEventListener('mousemove', e => { mx = e.clientX / innerWidth; my = e.clientY / innerHeight; });
+  addEventListener('resize', resize);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) cancelAnimationFrame(raf);
+    else if (!reduced) raf = requestAnimationFrame(frame);
+  });
+  resize();
+  if (reduced){ frame(); cancelAnimationFrame(raf); } else frame();
+})();
+</script>
+</body>
+</html>

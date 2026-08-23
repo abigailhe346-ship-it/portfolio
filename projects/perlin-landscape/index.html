@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GEN—04 · Perlin Landscape</title>
+<style>
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:difference;color:#fff;pointer-events:none}
+.topbar a{color:#fff;text-decoration:none;pointer-events:auto}
+.topbar a:hover{text-decoration:underline}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;padding:0;height:100%;overflow:hidden}
+  canvas{display:block;width:100vw;height:100vh}
+  .toggle{
+    position:fixed;top:56px;right:24px;z-index:20;
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    background:transparent;border:1px solid currentColor;border-radius:999px;padding:9px 20px;cursor:pointer;
+    transition:color .8s ease,border-color .8s ease;-webkit-tap-highlight-color:transparent;
+  }
+  .toggle:hover{opacity:.75}
+  .caption{position:fixed;left:24px;bottom:22px;z-index:10;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;pointer-events:none;line-height:1.9;transition:color .8s ease}
+  .sig{position:fixed;left:24px;top:64px;z-index:10;pointer-events:none}
+  .sig h1{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:clamp(26px,3.4vw,44px);margin:0;line-height:1.05;transition:color .8s ease}
+</style>
+</head>
+<body>
+<div class="topbar"><a href="../../index.html">← Index</a><span>GEN—04 · Perlin Landscape</span></div>
+<div class="sig"><h1 id="ttl">Seven Ridges, One Wind</h1></div>
+<button class="toggle" id="toggle">Dusk</button>
+<div class="caption" id="cap">mouse Y — parallax amplitude<br>auto drift — 0.18 px/frame</div>
+<canvas id="c"></canvas>
+<script>
+(function(){
+  'use strict';
+  var canvas = document.getElementById('c');
+  var ctx = canvas.getContext('2d');
+  var DPR = Math.min(window.devicePixelRatio || 1, 2);
+  var W = 0, H = 0;
+
+  /* ---------- Perlin 1D (from 2D improved noise) ---------- */
+  var perm = new Uint8Array(512);
+  (function(){
+    var p = [], i;
+    for (i = 0; i < 256; i++) p[i] = i;
+    var seed = 4242;
+    function rnd(){ seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+    for (i = 255; i > 0; i--){
+      var j = Math.floor(rnd() * (i + 1));
+      var t = p[i]; p[i] = p[j]; p[j] = t;
+    }
+    for (i = 0; i < 512; i++) perm[i] = p[i & 255];
+  })();
+  function fade(t){ return t * t * t * (t * (t * 6 - 15) + 10); }
+  function lerp(a, b, t){ return a + t * (b - a); }
+  function grad1(h, x){ return (h & 1) ? -x : x; }
+  function noise1(x){
+    var X = Math.floor(x) & 255;
+    x -= Math.floor(x);
+    var u = fade(x);
+    return lerp(grad1(perm[X], x), grad1(perm[X + 1], x - 1), u) * 2;
+  }
+  function ridge(x, oct){
+    // ridged fbm: sharp crests -> woodcut look
+    var f = 0, a = 0.55, fr = 1;
+    for (var i = 0; i < oct; i++){
+      var n = 1 - Math.abs(noise1(x * fr));
+      n = n * n;
+      f += n * a;
+      a *= 0.5; fr *= 2.1;
+    }
+    return f;
+  }
+
+  /* ---------- themes ---------- */
+  function rgb(h){
+    return [parseInt(h.substr(1,2),16), parseInt(h.substr(3,2),16), parseInt(h.substr(5,2),16)];
+  }
+  // Dawn: paper white bg, black ink lines, fills from light grey (far) to near-black... keep fills pale
+  // Dusk: deep blue bg #0d1626, fluorescent cyan lines #7ee8fa
+  var THEMES = {
+    dawn: {
+      bg: rgb('#f4f1e8'),
+      ink: rgb('#111111'),
+      fills: ['#e6e2d6','#d9d4c6','#cbc5b5','#bcb5a3','#a79f8b','#8d8570','#6d6654','#3a352c'].map(rgb),
+      glow: 0
+    },
+    dusk: {
+      bg: rgb('#0d1626'),
+      ink: rgb('#7ee8fa'),
+      fills: ['#132037','#111d33','#0f1a2e','#0e1829','#0c1524','#0a1220','#080f1b','#060b14'].map(rgb),
+      glow: 1
+    }
+  };
+  var LAYERS = 7; // use 7 ridgelines
+  var themeMix = 0;      // 0 = dawn, 1 = dusk
+  var themeTarget = 0;
+  var toggleBtn = document.getElementById('toggle');
+  var ttl = document.getElementById('ttl');
+  var cap = document.getElementById('cap');
+
+  toggleBtn.addEventListener('click', function(){
+    themeTarget = themeTarget > 0.5 ? 0 : 1;
+    toggleBtn.textContent = themeTarget > 0.5 ? 'Dawn' : 'Dusk';
+  });
+
+  function mixc(a, b, t){
+    return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ',' +
+                    Math.round(a[1] + (b[1] - a[1]) * t) + ',' +
+                    Math.round(a[2] + (b[2] - a[2]) * t) + ')';
+  }
+
+  /* ---------- mouse parallax ---------- */
+  var mouseYN = 0.5, parallax = 0;
+  window.addEventListener('pointermove', function(e){
+    mouseYN = e.clientY / Math.max(1, window.innerHeight);
+  }, { passive: true });
+
+  /* ---------- resize ---------- */
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  /* ---------- loop ---------- */
+  var drift = 0;
+  var running = true, rafId = 0;
+  var STEP = 3;
+
+  function frame(){
+    if (!running) return;
+
+    // smooth theme transition
+    themeMix += (themeTarget - themeMix) * 0.045;
+    if (Math.abs(themeTarget - themeMix) < 0.001) themeMix = themeTarget;
+    var tm = themeMix * themeMix * (3 - 2 * themeMix);
+
+    // smooth parallax amplitude from mouse Y (0.15 .. 1.0)
+    parallax += ((0.15 + mouseYN * 0.85) - parallax) * 0.06;
+
+    var bg = mixc(THEMES.dawn.bg, THEMES.dusk.bg, tm);
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    ttl.style.color = mixc(THEMES.dawn.ink, THEMES.dusk.ink, tm);
+    cap.style.color = tm < 0.5 ? 'rgba(17,17,17,' + (0.45 + tm * 0.1) + ')' : 'rgba(126,232,250,0.5)';
+    toggleBtn.style.color = mixc(THEMES.dawn.ink, THEMES.dusk.ink, tm);
+
+    var ink = mixc(THEMES.dawn.ink, THEMES.dusk.ink, tm);
+    var glow = tm; // glow only in dusk
+    var baseY = H * 0.28;
+    var spreadBase = H * 0.085;
+    var spreadVar = H * 0.075 * parallax;
+
+    // draw far -> near
+    for (var layer = 0; layer < LAYERS; layer++){
+      var depth = layer / (LAYERS - 1); // 0 far, 1 near
+      var ly = baseY + layer * (spreadBase + spreadVar);
+      var amp = (H * 0.11) * (0.35 + depth * 0.85) * (0.6 + parallax * 0.6);
+      var speedF = 0.35 + depth * 1.0;           // near layers drift faster
+      var xoffPx = drift * speedF + layer * 137.7; // pixel-space offset
+      var scale = 0.0018 + depth * 0.0012;
+
+      function ridgeY(px){
+        return ly - ridge((px + xoffPx) * scale, 4) * amp
+                  - ridge((px * 2.6 + xoffPx * 0.5) * scale, 3) * amp * 0.35;
+      }
+
+      var fillA = THEMES.dawn.fills[Math.min(7, layer + 1)];
+      var fillB = THEMES.dusk.fills[Math.min(7, layer + 1)];
+
+      ctx.beginPath();
+      ctx.moveTo(-4, H + 4);
+      var x, y;
+      for (x = -4; x <= W + 4; x += STEP){
+        y = ridgeY(x);
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(W + 4, H + 4);
+      ctx.closePath();
+      ctx.fillStyle = mixc(fillA, fillB, tm);
+      ctx.fill();
+
+      // crest stroke — width grows with depth (woodcut hierarchy)
+      var lw = 0.7 + depth * depth * 1.9;
+      if (glow > 0.05){
+        ctx.shadowColor = 'rgba(126,232,250,' + (0.55 * glow) + ')';
+        ctx.shadowBlur = 8 * glow;
+      }
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = lw;
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      for (x = -4; x <= W + 4; x += STEP){
+        y = ridgeY(x);
+        if (x === -4) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // engraved echo line on near layers (double-strike, slightly offset)
+      if (depth > 0.55){
+        ctx.strokeStyle = tm < 0.5 ? 'rgba(17,17,17,0.22)' : 'rgba(126,232,250,' + (0.20 * glow + 0.05) + ')';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        for (x = -4; x <= W + 4; x += STEP){
+          y = ridgeY(x) + 2.5 + depth * 2.5;
+          if (x === -4) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+    }
+
+    drift += 0.18;
+    rafId = requestAnimationFrame(frame);
+  }
+  rafId = requestAnimationFrame(frame);
+
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden){
+      running = false;
+      cancelAnimationFrame(rafId);
+    } else if (!running){
+      running = true;
+      rafId = requestAnimationFrame(frame);
+    }
+  });
+})();
+</script>
+</body>
+</html>

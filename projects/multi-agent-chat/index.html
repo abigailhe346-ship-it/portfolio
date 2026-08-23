@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-Agent — AGT—03</title>
+<style>
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:difference;color:#fff;pointer-events:none}
+.topbar a{color:#fff;text-decoration:none;pointer-events:auto}
+.topbar a:hover{text-decoration:underline}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<div class="topbar"><a href="../../index.html">← Index</a><span>AGT—03 · Multi-Agent</span></div>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:#faf9f6;color:#1a1a1c;font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased}
+::selection{background:#1a1a1c;color:#faf9f6}
+.wrap{display:grid;grid-template-columns:1fr 320px;height:100vh;padding-top:54px}
+.main{overflow-y:auto;padding:0 6vw 120px;scrollbar-width:thin}
+.side{border-left:1px solid #e6e3db;padding:26px 28px;overflow-y:auto;background:#f4f2ec;display:flex;flex-direction:column;gap:26px}
+
+/* hero / task bar */
+.hero{padding:44px 0 8px;border-bottom:1px solid #e6e3db;margin-bottom:34px}
+.hero .kicker{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8a867b;margin-bottom:14px}
+.hero h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(34px,4.4vw,54px);line-height:1.05;letter-spacing:-.01em}
+.hero h1 em{font-style:italic;color:#7c5cd6}
+.tasks{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 30px}
+.task-chip{padding:10px 16px;border:1px solid #d8d4c9;border-radius:22px;background:transparent;font-family:'Space Grotesk',sans-serif;font-size:12.5px;color:#5c584e;cursor:pointer;transition:all .25s}
+.task-chip:hover{border-color:#1a1a1c;color:#1a1a1c}
+.task-chip.on{background:#1a1a1c;color:#faf9f6;border-color:#1a1a1c}
+.start-btn{padding:12px 26px;border:none;border-radius:24px;background:#7c5cd6;color:#fff;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:transform .3s cubic-bezier(.22,1,.36,1),background .25s}
+.start-btn:hover{transform:scale(1.04);background:#6a4cc4}
+.start-btn:disabled{background:#c9c4b8;cursor:default;transform:none}
+
+/* conversation */
+.msg{display:grid;grid-template-columns:44px 1fr;gap:16px;margin-bottom:30px;animation:mIn .55s cubic-bezier(.22,1,.36,1) both}
+@keyframes mIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.avatar{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Instrument Serif',serif;font-size:20px;font-style:italic}
+.msg-head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+.who{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;padding:3px 9px;border-radius:10px;color:#fff}
+.role-sub{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#a39e92}
+.msg-body{font-size:14.5px;line-height:1.85;color:#33322e;max-width:62ch;white-space:pre-wrap}
+.msg-body .cursor{display:inline-block;width:7px;height:14px;background:#1a1a1c;vertical-align:-2px;animation:blink .7s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.quote{border-left:2px solid #d8d4c9;padding:6px 14px;margin:10px 0;font-family:'Instrument Serif',serif;font-style:italic;font-size:15px;color:#8a867b;background:#f2efe7;border-radius:0 8px 8px 0}
+.quote b{display:block;font-family:'JetBrains Mono',monospace;font-style:normal;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#a39e92;margin-bottom:3px}
+
+/* deliverable */
+.deliv{margin-top:44px;background:#1a1a1c;color:#f2f0ea;border-radius:16px;padding:clamp(28px,4vw,48px);animation:mIn .8s cubic-bezier(.22,1,.36,1) both;position:relative;overflow:hidden}
+.deliv::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#7c5cd6,#4e8ef0,#f08a3c)}
+.deliv .d-kick{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:#8f8b80;margin-bottom:14px}
+.deliv h2{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(26px,3.4vw,40px);line-height:1.1;margin-bottom:18px}
+.deliv h2 em{font-style:italic;color:#b79df0}
+.deliv p{font-size:14px;line-height:1.85;color:#c9c5ba;max-width:58ch;margin-bottom:16px}
+.deliv ol{margin:0 0 20px 18px}
+.deliv li{font-size:13.5px;line-height:2;color:#b0aca1}
+.deliv li b{color:#f2f0ea;font-weight:500}
+.d-meta{display:flex;gap:22px;flex-wrap:wrap;padding-top:18px;border-top:1px solid #33322e;font-family:'JetBrains Mono',monospace;font-size:10px;color:#8f8b80}
+.d-meta b{color:#b79df0;font-weight:400}
+
+/* side panel */
+.panel h4{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8a867b;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.panel h4::after{content:'';flex:1;height:1px;background:#e0dccd}
+.gauge-box{text-align:center}
+.gauge-svg{width:190px;height:auto;display:block;margin:0 auto}
+.g-num{font-family:'Instrument Serif',serif;font-size:44px;fill:#1a1a1c}
+.g-cap{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.2em;fill:#a39e92;text-transform:uppercase}
+.g-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:#a39e92;margin-top:8px;line-height:1.7}
+.agent-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed #e0dccd}
+.agent-row:last-child{border:none}
+.agent-row .sq{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Instrument Serif',serif;font-style:italic;font-size:13px;flex:none;transition:transform .3s}
+.agent-row.active .sq{transform:scale(1.2);box-shadow:0 0 0 3px #fff,0 0 0 4.5px currentColor}
+.agent-row .an{font-size:13px;font-weight:500}
+.agent-row .ar{font-family:'JetBrains Mono',monospace;font-size:9px;color:#a39e92;margin-left:auto;text-transform:uppercase;letter-spacing:.1em}
+.replay-btn{width:100%;padding:13px;border:1px solid #1a1a1c;border-radius:24px;background:transparent;color:#1a1a1c;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:all .25s;display:none}
+.replay-btn:hover{background:#1a1a1c;color:#faf9f6}
+.replay-btn.show{display:block}
+.turn{font-family:'JetBrains Mono',monospace;font-size:10px;color:#a39e92}
+
+@media(max-width:900px){
+  .wrap{grid-template-columns:1fr;height:auto}
+  .main{padding:0 6vw 60px}
+  .side{border-left:none;border-top:1px solid #e6e3db}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="main" id="main">
+    <div class="hero">
+      <div class="kicker">Three agents · one brief · consensus-driven</div>
+      <h1>A planner, a researcher<br>and a <em>critic</em> walk into a doc.</h1>
+      <div class="tasks" id="tasks"></div>
+      <button class="start-btn" id="startBtn">▶ Convene Agents</button>
+    </div>
+    <div id="conv"></div>
+  </div>
+
+  <aside class="side">
+    <div class="panel gauge-box">
+      <h4 style="text-align:left">Consensus</h4>
+      <svg class="gauge-svg" viewBox="0 0 190 110">
+        <path d="M 15 100 A 80 80 0 0 1 175 100" fill="none" stroke="#e0dccd" stroke-width="7" stroke-linecap="round"/>
+        <path id="gArc" d="M 15 100 A 80 80 0 0 1 175 100" fill="none" stroke="#1a1a1c" stroke-width="7" stroke-linecap="round" stroke-dasharray="251.4" stroke-dashoffset="251.4"/>
+        <text x="95" y="88" text-anchor="middle" class="g-num" id="gNum">—</text>
+        <text x="95" y="106" text-anchor="middle" class="g-cap">agreement</text>
+      </svg>
+      <div class="g-label" id="gLabel">awaiting session</div>
+    </div>
+    <div class="panel">
+      <h4>Panel</h4>
+      <div class="agent-row" id="row-P"><span class="sq" style="background:#7c5cd6;color:#7c5cd6"><span style="color:#fff">P</span></span><span class="an">Planner</span><span class="ar">strategy</span></div>
+      <div class="agent-row" id="row-R"><span class="sq" style="background:#4e8ef0;color:#4e8ef0"><span style="color:#fff">R</span></span><span class="an">Researcher</span><span class="ar">evidence</span></div>
+      <div class="agent-row" id="row-C"><span class="sq" style="background:#f08a3c;color:#f08a3c"><span style="color:#fff">C</span></span><span class="an">Critic</span><span class="ar">dissent</span></div>
+    </div>
+    <div class="panel">
+      <h4>Session</h4>
+      <div class="turn" id="turnInfo">turn 0 · idle</div>
+    </div>
+    <button class="replay-btn" id="replayBtn">↺ Replay Session</button>
+  </aside>
+</div>
+
+<script>
+(function(){
+'use strict';
+const AGENTS = {
+  P:{ name:'Planner',    color:'#7c5cd6', sub:'frames the problem, proposes structure' },
+  R:{ name:'Researcher', color:'#4e8ef0', sub:'brings evidence, benchmarks, numbers' },
+  C:{ name:'Critic',     color:'#f08a3c', sub:'attacks weak claims, forces revision' }
+};
+
+const TASKS = [
+{
+  id:0, chip:'Coffee brand landing page',
+  script:[
+    {r:'P', t:'Brief accepted. A landing page for a specialty coffee brand. My instinct: lead with ritual, not product. Structure — hero with a single steaming cup, origin story mid-fold, subscription offer at the close. Three sections, one scroll, zero clutter.'},
+    {r:'R', t:'Benchmarks pulled. Blue Bottle and Onyx both convert best with origin-first storytelling — pages that open on farm photography see 31% longer dwell time. Specialty buyers skew 26–38, mobile-first, and 68% abandon if shipping info isn\'t above the fold.'},
+    {r:'C', t:'"Lead with ritual, not product" is a lovely sentence that sells nothing.', q:{w:'Planner', x:'lead with ritual, not product'}, a:'Ritual is atmosphere; the page must sell beans. Where is the offer? Where is the price? Atmosphere without a CTA is a screensaver.'},
+    {r:'P', t:'Fair hit. Revised structure: hero pairs the ritual imagery with a €14/bag anchor price and a tasting-notes CTA. Story stays, but every section now ends in a purchase path. Atmosphere earns attention; the offer converts it.'},
+    {r:'R', t:'Supporting data for the revision: anchored pricing on hero lifts add-to-cart 19% in DTC beverage. Also — subscriptions now drive 54% of specialty coffee revenue online. The subscribe option should be the default toggle, not an afterthought.'},
+    {r:'C', t:'Better. But "farm photography" is table stakes — everyone does it.', q:{w:'Researcher', x:'pages that open on farm photography see 31% longer dwell time'}, a:'If everyone does it, it is invisible. What does THIS brand own? Give me one differentiator or the hero is wallpaper.'},
+    {r:'P', t:'Agreed. The differentiator: roast-date transparency. Every bag stamped with the exact roast hour; the hero carries a live counter — "roasted 38 hours ago." No competitor leads with freshness as a measurable claim. Story, proof, offer — in that order.'},
+    {r:'R', t:'Verified: "freshness" ranks top-3 in specialty purchase drivers, and a live roast counter is technically trivial — one timestamp field in the CMS. Dwell-time risk is low, novelty value is high. I endorse this direction.'},
+    {r:'C', t:'The roast counter is the first idea today I cannot kill. Small, provable, ownable. I withdraw my objection to the hero. Remaining nit: keep the subscription toggle visually secondary on first paint — let the single bag close the first sale.'},
+    {r:'P', t:'Consensus noted. Locking the brief: hero with roast-hour counter and €14 anchor, origin story mid-fold, subscription upsell after first purchase intent. Writing the final spec now.'}
+  ],
+  deliv:{
+    title:'Landing spec — <em>“Roasted 38 hours ago”</em>',
+    body:'A single-scroll landing page for a specialty coffee brand. The hero pairs ritual photography with a live roast-freshness counter and an anchored €14 price. Origin storytelling occupies the mid-fold; subscription is offered only after single-bag intent.',
+    items:[
+      '<b>Hero</b> — roast-hour counter, €14 anchor, tasting-notes CTA',
+      '<b>Mid-fold</b> — origin story, farm-to-cup timeline, process film',
+      '<b>Offer</b> — single bag first; subscription as second-paint upsell',
+      '<b>Trust</b> — shipping info above the fold, roast-date guarantee'
+    ],
+    meta:'3 sections · 1 scroll · mobile-first'
+  }
+},
+{
+  id:1, chip:'Notes app launch post',
+  script:[
+    {r:'P', t:'Task: launch announcement for a notes app. My framing — don\'t announce features, announce a feeling. The post should read like a sigh of relief: your thoughts, finally in one calm place. Short sentences. One screenshot. Done.'},
+    {r:'R', t:'Launch data: Product Hunt posts under 120 words with a single hero screenshot outperform feature-list posts by 2.4× in upvotes. But — top launches in the "productivity" category all name their sync speed. "Offline-first" and "opens in 80ms" are the category\'s magic words.'},
+    {r:'C', t:'"Announce a feeling" is how you get a beautiful post that nobody installs from.', q:{w:'Planner', x:'don\'t announce features, announce a feeling'}, a:'Feelings don\'t survive the App Store page. Users compare spec sheets: sync, offline, export. If we don\'t name the hard features, we lose to whoever does.'},
+    {r:'P', t:'Conceded — pure poetry won\'t convert. Hybrid: open on the feeling (two sentences max), then a proof block of exactly three hard claims — 80ms cold start, offline-first, end-to-end encrypted sync. Feeling earns the read; specs earn the install.'},
+    {r:'R', t:'Three claims is the right count — cognitive load research on launch pages shows recall collapses past four bullet points. Suggest ordering: speed first (universal), offline second (travelers), encryption last (closes the skeptics).'},
+    {r:'C', t:'Encryption last is a mistake.', q:{w:'Researcher', x:'encryption last (closes the skeptics)'}, a:'After the last three years of breaches, privacy is not a skeptic concern — it is a table-stakes filter. Burying it reads as evasive. Lead the proof block with it.'},
+    {r:'P', t:'The Critic is right, and I\'ll go further: put it in the headline. "Your notes. Yours only." — the feeling IS the privacy. Speed and offline become the supporting proof. This resolves the framing debate entirely.'},
+    {r:'R', t:'Strong synthesis. Privacy-led headlines in productivity launches averaged 41% higher CTR last quarter. All three claims survive, reordered: encryption → speed → offline. I\'m satisfied with the evidence base.'},
+    {r:'C', t:'Objections exhausted. The post now has one feeling, three provable claims, and no fluff. Approve for drafting.'},
+    {r:'P', t:'Locked. Drafting the announcement: privacy-first headline, two emotional sentences, three-claim proof block, single screenshot, one CTA.'}
+  ],
+  deliv:{
+    title:'Launch post — <em>“Your notes. Yours only.”</em>',
+    body:'A 110-word announcement that leads with end-to-end encryption as both feature and feeling, followed by a three-claim proof block. One screenshot, one call to action, zero feature lists.',
+    items:[
+      '<b>Headline</b> — “Your notes. Yours only.” (privacy as promise)',
+      '<b>Proof block</b> — E2E encrypted · 80ms cold start · offline-first',
+      '<b>Visual</b> — single hero screenshot, no carousel',
+      '<b>CTA</b> — one button, no secondary links'
+    ],
+    meta:'110 words · 3 claims · 1 screenshot'
+  }
+},
+{
+  id:2, chip:'Sneaker drop pop-up tour',
+  script:[
+    {r:'P', t:'Brief: a 5-city pop-up tour for a sneaker drop. My proposal — scarcity as architecture. Small footprint, 72 hours per city, queue culture as the spectacle. Cities: London, Tokyo, NYC, Seoul, Paris. The queue IS the marketing.'},
+    {r:'R', t:'Market scan: sneaker pop-ups under 4 days generate 3.1× more social impressions per square meter than week-long installations. Tokyo and Seoul deliver the highest queue-to-purchase conversion (62%). London delivers reach but lowest conversion (34%). Paris in fashion month conflicts with 40+ competing events.'},
+    {r:'C', t:'Five cities is a budget bonfire dressed as ambition.', q:{w:'Planner', x:'Cities: London, Tokyo, NYC, Seoul, Paris'}, a:'You chose cities for the mood board, not the margin. London converts at 34% — that is a photo shoot, not a retail channel. Cut the vanity cities.'},
+    {r:'P', t:'Defend Tokyo, Seoul, NYC — agreed, they stay. But dropping London entirely abandons European press; the tour needs one EU anchor. Trade: cut Paris (event collision is real), keep London but shrink it to a 48-hour gallery format — press event first, retail second.'},
+    {r:'R', t:'The 48-hour London gallery format is sound — press-first pop-ups in Shoreditch earned 5× earned-media value vs. pure retail formats. Recalculated: 4 cities, same budget envelope, projected conversion now 51% blended, up from 43%.'},
+    {r:'C', t:'Numbers improved. One remaining weakness — "the queue IS the marketing" is lazy.', q:{w:'Planner', x:'The queue IS the marketing'}, a:'Queues are organic for Travis Scott, not for us. What pulls the first 200 people to a sidewalk in Seoul? Scarcity needs an ignition mechanism, not a hope.'},
+    {r:'P', t:'Ignition mechanism, concrete: 48 hours before each city opens, 100 geo-locked raffle slots drop on the app — winners skip the queue and get early sizing. Local sneaker Discords get the coordinates first. The queue still happens, but it arrives pre-seeded.'},
+    {r:'R', t:'Raffle seeding is proven — geo-locked early slots drove 71% show-up rates in comparable drops, and Discord-first announcements out-perform paid geo ads 4:1 on cost per attendee. Plan is now evidence-backed end to end.'},
+    {r:'C', t:'The tour now has a reason to exist in each city and a mechanism to ignite each queue. I have nothing left to break. Approved.'},
+    {r:'P', t:'Finalizing: 4 cities — Tokyo, Seoul, NYC, London. 72-hour retail format, London at 48-hour press-gallery. App raffle ignition in every market. Writing the tour plan.'}
+  ],
+  deliv:{
+    title:'Tour plan — <em>4 cities, zero vanity</em>',
+    body:'A four-city pop-up tour built on 72-hour scarcity formats, with London converted to a 48-hour press-first gallery. Every city opens with a geo-locked app raffle that pre-seeds the queue with 100 early winners.',
+    items:[
+      '<b>Tokyo · Seoul · NYC</b> — 72-hour retail format, full stock',
+      '<b>London</b> — 48-hour press gallery, limited run',
+      '<b>Paris</b> — cut (fashion-month collision, low conversion)',
+      '<b>Ignition</b> — geo-locked raffle, Discord-first coordinates'
+    ],
+    meta:'4 cities · 51% blended conversion · raffle-seeded'
+  }
+}
+];
+
+const conv = document.getElementById('conv');
+const main = document.getElementById('main');
+const tasksEl = document.getElementById('tasks');
+const startBtn = document.getElementById('startBtn');
+const replayBtn = document.getElementById('replayBtn');
+const gArc = document.getElementById('gArc');
+const gNum = document.getElementById('gNum');
+const gLabel = document.getElementById('gLabel');
+const turnInfo = document.getElementById('turnInfo');
+const ARC_LEN = 251.4;
+
+let selTask = 0, running = false, curGauge = 0, gaugeTarget = 40, gaugeRAF = null;
+
+TASKS.forEach((t, i) => {
+  const b = document.createElement('button');
+  b.className = 'task-chip' + (i === 0 ? ' on' : '');
+  b.textContent = t.chip;
+  b.addEventListener('click', () => {
+    if(running) return;
+    selTask = i;
+    document.querySelectorAll('.task-chip').forEach((c, j) => c.classList.toggle('on', j === i));
+  });
+  tasksEl.appendChild(b);
+});
+
+function setGauge(v){
+  gaugeTarget = v;
+  if(gaugeRAF) return;
+  const tick = () => {
+    curGauge += (gaugeTarget - curGauge) * 0.08;
+    if(Math.abs(gaugeTarget - curGauge) < 0.3){ curGauge = gaugeTarget; gaugeRAF = null; }
+    gArc.style.strokeDashoffset = ARC_LEN * (1 - curGauge / 100);
+    gNum.textContent = Math.round(curGauge) + '%';
+    gLabel.textContent = curGauge < 55 ? 'positions diverging' : curGauge < 75 ? 'converging…' : curGauge < 92 ? 'near alignment' : 'consensus reached';
+    if(gaugeRAF !== null) gaugeRAF = requestAnimationFrame(tick);
+    else gArc.style.strokeDashoffset = ARC_LEN * (1 - curGauge / 100);
+  };
+  gaugeRAF = requestAnimationFrame(tick);
+}
+
+let hidden = false;
+document.addEventListener('visibilitychange', () => { hidden = document.hidden; });
+const waitVisible = () => new Promise(res => {
+  const h = () => { if(!document.hidden){ document.removeEventListener('visibilitychange', h); res(); } };
+  document.addEventListener('visibilitychange', h);
+});
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+async function typeInto(el, text){
+  const cur = document.createElement('span');
+  cur.className = 'cursor';
+  el.appendChild(cur);
+  for(let i = 0; i < text.length; i++){
+    if(hidden) await waitVisible();
+    cur.insertAdjacentText('beforebegin', text[i]);
+    if(i % 3 === 0) await sleep(13);
+    main.scrollTop = main.scrollHeight;
+  }
+  cur.remove();
+}
+
+async function run(){
+  if(running) return;
+  running = true;
+  startBtn.disabled = true;
+  replayBtn.classList.remove('show');
+  conv.innerHTML = '';
+  curGauge = 40; gaugeTarget = 40;
+  gArc.style.strokeDashoffset = ARC_LEN * 0.6;
+  gNum.textContent = '40%';
+  gLabel.textContent = 'positions diverging';
+  const T = TASKS[selTask];
+  const n = T.script.length;
+
+  for(let i = 0; i < n; i++){
+    if(hidden) await waitVisible();
+    const m = T.script[i];
+    const A = AGENTS[m.r];
+    document.querySelectorAll('.agent-row').forEach(r => r.classList.remove('active'));
+    document.getElementById('row-' + m.r).classList.add('active');
+    turnInfo.textContent = 'turn ' + (i + 1) + ' · ' + A.name.toLowerCase() + ' speaking';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'msg';
+    wrap.innerHTML =
+      '<div class="avatar" style="background:' + A.color + '">' + m.r + '</div>' +
+      '<div><div class="msg-head"><span class="who" style="background:' + A.color + '">' + A.name + '</span>' +
+      '<span class="role-sub">' + A.sub + '</span></div><div class="msg-body"></div></div>';
+    conv.appendChild(wrap);
+    const body = wrap.querySelector('.msg-body');
+
+    if(m.q){
+      const q = document.createElement('div');
+      q.className = 'quote';
+      q.innerHTML = '<b>↩ quoting ' + m.q.w + '</b>“' + m.q.x + '”';
+      body.appendChild(q);
+      await sleep(300);
+    }
+    await typeInto(body, m.t);
+    if(m.a){
+      const extra = document.createElement('div');
+      extra.style.marginTop = '8px';
+      body.appendChild(extra);
+      await typeInto(extra, m.a);
+    }
+    setGauge(40 + (55 * (i + 1) / n) + (i === n - 1 ? 3 : 0));
+    await sleep(350);
+  }
+
+  document.querySelectorAll('.agent-row').forEach(r => r.classList.remove('active'));
+  turnInfo.textContent = 'turn ' + n + ' · deliverable issued';
+  setGauge(97);
+  await sleep(500);
+
+  const d = T.deliv;
+  const card = document.createElement('div');
+  card.className = 'deliv';
+  card.innerHTML =
+    '<div class="d-kick">◆ Final Deliverable · ratified by consensus</div>' +
+    '<h2>' + d.title + '</h2>' +
+    '<p>' + d.body + '</p>' +
+    '<ol>' + d.items.map(x => '<li>' + x + '</li>').join('') + '</ol>' +
+    '<div class="d-meta"><span>panel <b>3 agents</b></span><span>turns <b>' + n + '</b></span><span>consensus <b>97%</b></span><span>' + d.meta + '</span></div>';
+  conv.appendChild(card);
+  main.scrollTo({ top: main.scrollHeight, behavior: 'smooth' });
+  running = false;
+  replayBtn.classList.add('show');
+}
+
+startBtn.addEventListener('click', run);
+replayBtn.addEventListener('click', run);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WEB—03 · Type Lab</title>
+<style>
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:difference;color:#fff;pointer-events:none}
+.topbar a{color:#fff;text-decoration:none;pointer-events:auto}
+.topbar a:hover{text-decoration:underline}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<div class="topbar"><a href="../../index.html">← Index</a><span>WEB—03 · Type Lab</span></div>
+<style>
+:root{
+  --bg:#f4f1ea;
+  --ink:#141312;
+  --line:rgba(20,19,18,.15);
+  --mono:'JetBrains Mono',monospace;
+  --serif:'Instrument Serif',serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;-webkit-font-smoothing:antialiased}
+::selection{background:var(--ink);color:var(--bg)}
+
+.layout{display:grid;grid-template-columns:1fr 260px;height:100vh;padding-top:56px}
+
+/* ---------- stage ---------- */
+.stage{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;border-right:1px solid var(--line)}
+.stage::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(var(--line) 1px,transparent 1px) 0 0/100% 25%,
+    linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/25% 100%;
+  opacity:.35;
+}
+#specimen{
+  position:relative;white-space:nowrap;outline:none;cursor:text;
+  font-family:var(--serif);
+  caret-color:var(--ink);
+  line-height:1;
+}
+#specimen .ch{display:inline-block;will-change:transform;transform-origin:50% 60%}
+#specimen .sp{display:inline-block}
+.hint{
+  position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.45;white-space:nowrap;
+}
+.readout{
+  position:absolute;top:20px;left:24px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.55;line-height:1.9;
+}
+
+/* ---------- control panel ---------- */
+.panel{display:flex;flex-direction:column;padding:28px 24px 0;gap:30px;overflow-y:auto}
+.panel h1{font-family:var(--mono);font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+.ctl label b{font-weight:400;opacity:.55}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:18px;background:transparent;cursor:pointer;
+}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--ink);opacity:.6}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--bg);border:1.5px solid var(--ink);margin-top:-6px;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1);
+}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.35)}
+input[type=range]::-moz-range-track{height:1px;background:var(--ink)}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--bg);border:1.5px solid var(--ink)}
+
+/* mode buttons */
+.modes{margin-top:auto;border-top:1px solid var(--line);padding:22px 0 28px;display:flex;flex-direction:column;gap:8px}
+.modes span{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.55;margin-bottom:6px}
+.mode{
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  background:none;border:1px solid var(--line);color:var(--ink);padding:13px 0;cursor:pointer;
+  transition:background .3s,color .3s,border-color .3s;
+}
+.mode:hover{border-color:var(--ink)}
+.mode.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+@media (max-width:760px){
+  body{overflow:auto;height:auto}
+  .layout{grid-template-columns:1fr;height:auto}
+  .stage{height:62vh;border-right:none;border-bottom:1px solid var(--line)}
+  .panel{padding-bottom:32px}
+  .modes{flex-direction:row;flex-wrap:wrap}
+  .modes span{width:100%}
+  .mode{flex:1;padding:13px 6px}
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <main class="stage">
+    <div class="readout" id="readout"></div>
+    <div id="specimen" contenteditable="true" spellcheck="false" aria-label="Editable specimen">Typographia</div>
+    <div class="hint">Click the word to edit — Weight / Tracking / Slant / Size on the right</div>
+  </main>
+
+  <aside class="panel">
+    <h1>Type Lab — Controls</h1>
+    <div class="ctl"><label>Weight <b id="v-w">400</b></label><input type="range" id="s-w" min="300" max="600" value="400" step="1"></div>
+    <div class="ctl"><label>Tracking <b id="v-t">0.00em</b></label><input type="range" id="s-t" min="-40" max="200" value="0" step="1"></div>
+    <div class="ctl"><label>Slant <b id="v-s">0°</b></label><input type="range" id="s-s" min="0" max="14" value="0" step="1"></div>
+    <div class="ctl"><label>Size <b id="v-z">14vw</b></label><input type="range" id="s-z" min="4" max="22" value="14" step="1"></div>
+    <div class="modes">
+      <span>Motion Mode</span>
+      <button class="mode" data-mode="wave">Wave</button>
+      <button class="mode" data-mode="orbit">Orbit</button>
+      <button class="mode" data-mode="scatter">Scatter</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var spec = document.getElementById('specimen');
+  var readout = document.getElementById('readout');
+
+  /* ---------- state ---------- */
+  var state = { weight: 400, tracking: 0, slant: 0, size: 14 };
+  var mode = null; // 'wave' | 'orbit' | 'scatter' | null
+  var mouse = { x: innerWidth / 2, y: innerHeight / 2 };
+  var chars = []; // {el, x,y,vx,vy, tx,ty, phase, scattered}
+
+  /* ---------- split into chars ---------- */
+  function split(){
+    var text = spec.textContent;
+    spec.innerHTML = '';
+    chars = [];
+    for (var i = 0; i < text.length; i++){
+      var c = text[i];
+      var el = document.createElement('span');
+      if (c === ' '){ el.className = 'sp'; el.innerHTML = '&nbsp;'; }
+      else { el.className = 'ch'; el.textContent = c; }
+      spec.appendChild(el);
+      chars.push({ el: el, x: 0, y: 0, vx: 0, vy: 0, phase: i * 0.45, space: c === ' ' });
+    }
+    applyStatic();
+  }
+
+  /* ---------- static style from sliders ---------- */
+  function applyStatic(){
+    spec.style.fontSize = state.size + 'vw';
+    spec.style.letterSpacing = (state.tracking / 1000) + 'em';
+    spec.style.fontWeight = state.weight;
+    spec.style.fontStyle = state.slant > 0 ? 'italic' : 'normal';
+    spec.style.fontVariationSettings = '"wght" ' + state.weight;
+    spec.style.transform = 'skewX(' + (-state.slant) + 'deg)';
+    readout.innerHTML =
+      'Family — Instrument Serif<br>Wght ' + state.weight +
+      ' / Trk ' + (state.tracking / 1000).toFixed(2) + 'em<br>Slnt ' + state.slant + '° / Size ' + state.size + 'vw';
+  }
+
+  /* ---------- sliders ---------- */
+  function bind(id, vid, key, fmt){
+    var s = document.getElementById(id), v = document.getElementById(vid);
+    s.addEventListener('input', function(){
+      state[key] = +s.value;
+      v.textContent = fmt(+s.value);
+      applyStatic();
+    });
+  }
+  bind('s-w', 'v-w', 'weight', function(n){ return n; });
+  bind('s-t', 'v-t', 'tracking', function(n){ return (n / 1000).toFixed(2) + 'em'; });
+  bind('s-s', 'v-s', 'slant', function(n){ return n + '°'; });
+  bind('s-z', 'v-z', 'size', function(n){ return n + 'vw'; });
+
+  /* ---------- editing ---------- */
+  var editTimer = null;
+  spec.addEventListener('input', function(){
+    clearTimeout(editTimer);
+    editTimer = setTimeout(function(){
+      var sel = window.getSelection();
+      var offset = 0;
+      if (sel.rangeCount){
+        var r = sel.getRangeAt(0).cloneRange();
+        r.selectNodeContents(spec);
+        r.setEnd(sel.getRangeAt(0).endContainer, sel.getRangeAt(0).endOffset);
+        offset = r.toString().length;
+      }
+      split();
+      // restore caret
+      try{
+        var range = document.createRange();
+        var count = 0, done = false;
+        (function walk(node){
+          if (done) return;
+          if (node.nodeType === 3){
+            if (count + node.length >= offset){ range.setStart(node, Math.min(offset - count, node.length)); done = true; }
+            count += node.length;
+          } else {
+            for (var i = 0; i < node.childNodes.length; i++) walk(node.childNodes[i]);
+          }
+        })(spec);
+        if (done){ range.collapse(true); sel.removeAllRanges(); sel.addRange(range); }
+      }catch(e){ /* caret restore best-effort */ }
+    }, 350);
+  });
+  spec.addEventListener('blur', function(){ if (!spec.textContent.trim()){ spec.textContent = 'Typographia'; split(); } });
+
+  /* ---------- modes ---------- */
+  var btns = document.querySelectorAll('.mode');
+  btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      var m = b.dataset.mode;
+      if (mode === m){ mode = null; b.classList.remove('on'); resetChars(); return; }
+      mode = m;
+      btns.forEach(function(x){ x.classList.toggle('on', x === b); });
+      if (m === 'scatter'){
+        // explode now; spring physics in the loop pulls them home
+        chars.forEach(function(c){
+          var a = Math.random() * Math.PI * 2;
+          var f = 14 + Math.random() * 26;
+          c.vx += Math.cos(a) * f;
+          c.vy += Math.sin(a) * f;
+        });
+      } else {
+        chars.forEach(function(c){ c.vx = c.vy = 0; });
+      }
+    });
+  });
+
+  function resetChars(){
+    chars.forEach(function(c){ c.el.style.transform = ''; c.x = c.y = c.vx = c.vy = 0; });
+  }
+
+  window.addEventListener('mousemove', function(e){ mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
+  window.addEventListener('touchmove', function(e){
+    if (e.touches[0]){ mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; }
+  }, { passive: true });
+
+  /* ---------- animation loop ---------- */
+  var running = true, rafId = null;
+
+  function frame(now){
+    if (!running) return;
+    var t = now / 1000;
+
+    if (mode === 'wave'){
+      for (var i = 0; i < chars.length; i++){
+        var c = chars[i];
+        if (c.space) continue;
+        var y = Math.sin(t * 2.2 + c.phase) * 0.16; // in em, scales with size
+        var rot = Math.sin(t * 2.2 + c.phase - 0.6) * 6;
+        c.el.style.transform = 'translateY(' + y + 'em) rotate(' + rot + 'deg)';
+      }
+    } else if (mode === 'orbit'){
+      var rect = spec.getBoundingClientRect();
+      var ox = rect.left + rect.width / 2, oy = rect.top + rect.height / 2;
+      var ang = Math.atan2(mouse.y - oy, mouse.x - ox);
+      for (var j = 0; j < chars.length; j++){
+        var d = chars[j];
+        if (d.space) continue;
+        var a = ang + t * 1.6 + d.phase;
+        var rad = 0.22 + 0.1 * Math.sin(t + d.phase * 2);
+        d.el.style.transform =
+          'translate(' + (Math.cos(a) * rad) + 'em,' + (Math.sin(a) * rad * 0.7) + 'em)' +
+          ' rotate(' + (Math.sin(a + t) * 10) + 'deg)';
+      }
+    } else if (mode === 'scatter'){
+      // spring back to origin; clicks re-explode via the mode button
+      for (var k = 0; k < chars.length; k++){
+        var s = chars[k];
+        if (s.space) continue;
+        // spring: k=0.06, damping=0.86
+        s.vx += -s.x * 0.06; s.vy += -s.y * 0.06;
+        s.vx *= 0.86; s.vy *= 0.86;
+        s.x += s.vx; s.y += s.vy;
+        s.el.style.transform = 'translate(' + s.x + 'px,' + s.y + 'px) rotate(' + (s.x * 0.6) + 'deg)';
+      }
+    }
+    rafId = requestAnimationFrame(frame);
+  }
+
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden){ running = false; if (rafId) cancelAnimationFrame(rafId); }
+    else if (!running){ running = true; rafId = requestAnimationFrame(frame); }
+  });
+
+  /* re-explode scattered letters when clicking the specimen */
+  spec.addEventListener('mousedown', function(){
+    if (mode !== 'scatter') return;
+    chars.forEach(function(c){
+      var a = Math.random() * Math.PI * 2, f = 10 + Math.random() * 22;
+      c.vx += Math.cos(a) * f; c.vy += Math.sin(a) * f;
+    });
+  });
+
+  split();
+  rafId = requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
